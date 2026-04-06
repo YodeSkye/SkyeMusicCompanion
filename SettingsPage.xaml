@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SkyeMusicCompanion.SettingsPage"
+             Title="Settings">
+
+    <VerticalStackLayout Padding="20" Spacing="30">
+
+        <!-- IP Group -->
+        <VerticalStackLayout Spacing="0">
+            <Label Text="Host Server IP"
+                   FontAttributes="Bold" />
+
+            <Entry x:Name="IpEntry"
+                   Placeholder="192.168.1.100"
+                   Keyboard="Numeric"
+                   Unfocused="OnIpChanged" />
+        </VerticalStackLayout>
+
+        <!-- Port Group -->
+        <VerticalStackLayout Spacing="0">
+            <Label Text="Host Server Port"
+                   FontAttributes="Bold" />
+
+            <Entry x:Name="PortEntry"
+                   Placeholder="5000"
+                   Keyboard="Numeric"
+                   Unfocused="OnPortChanged" />
+        </VerticalStackLayout>
+
+    </VerticalStackLayout>
+
+</ContentPage>

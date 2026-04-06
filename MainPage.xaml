@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SkyeMusicCompanion.MainPage">
+
+    <VerticalStackLayout Padding="20" Spacing="20">
+
+        <!-- NOW PLAYING SECTION -->
+        <VerticalStackLayout Spacing="5">
+
+            <Grid ColumnDefinitions="*,Auto" Padding="0,0,0,4">
+                <!-- LEFT: Play State -->
+                <HorizontalStackLayout Grid.Column="0" Spacing="6">
+                    <Label x:Name="PlayStateLabel"
+                       FontSize="22"/>
+                </HorizontalStackLayout>
+                <!-- RIGHT: Connection State -->
+                <Image x:Name="ConnectionStatusIcon"
+                       WidthRequest="16"
+                       HeightRequest="16"
+                       HorizontalOptions="End"
+                       VerticalOptions="Center" />
+            </Grid>
+
+            <Label x:Name="CurrentTitleLabel"
+                   FontSize="22"/>
+
+            <Label x:Name="TitleLabel"
+                   FontSize="18"/>
+
+            <Image x:Name="ArtworkImage"
+                   HeightRequest="300"
+                   WidthRequest="300"
+                   Aspect="AspectFill"
+                   HorizontalOptions="Center" />
+
+            <Grid ColumnDefinitions="*,*"
+                  Padding="0"
+                  Margin="0">
+
+                <!-- LEFT SIDE: Position -->
+                <HorizontalStackLayout Grid.Column="0"
+                                       Spacing="6"
+                                       IsVisible="False">
+                    <Label Text="Position:" 
+                           FontSize="18"/>
+                    <Label x:Name="PositionLabel"
+                           FontSize="18"/>
+                </HorizontalStackLayout>
+
+                <!-- RIGHT SIDE: Duration -->
+                <HorizontalStackLayout Grid.Column="1" 
+                                       Spacing="6"
+                                       HorizontalOptions="End">
+                    <Label x:Name="DurationTextLabel"
+                           Text="Duration:" 
+                           FontSize="18"/>
+                    <Label x:Name="DurationLabel"
+                           FontSize="18"/>
+                </HorizontalStackLayout>
+
+            </Grid>
+
+        </VerticalStackLayout>
+
+        <!-- CONTROL GRID -->
+        <Grid RowSpacing="15" ColumnSpacing="15">
+
+            <!-- Define rows -->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Define columns -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- TOP ROW -->
+            <Button Grid.Row="0" Grid.Column="0"
+                    x:Name="ToggleLabel"
+                    Text="Play"
+                    ImageSource="play32.png"
+                    ContentLayout="Left,10"
+                    Clicked="OnToggleClicked" />
+
+            <Button Grid.Row="0" Grid.Column="1"
+                    Text="Stop"
+                    ImageSource="stop32.png"
+                    ContentLayout="Left,10"
+                    Clicked="OnStopClicked" />
+
+            <!-- BOTTOM ROW -->
+            <Grid Grid.Row="1" Grid.ColumnSpan="2"
+                  ColumnSpacing="15"
+                  HorizontalOptions="Center">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Text="Prev"
+                        ImageSource="previous32.png"
+                        ContentLayout="Left,10"
+                        Clicked="OnPreviousClicked" />
+
+                <Button Grid.Column="1"
+                        Text="Next"
+                        ImageSource="next32.png"
+                        ContentLayout="Left,10"
+                        Clicked="OnNextClicked" />
+
+            </Grid>
+
+        </Grid>
+
+    </VerticalStackLayout>
+
+</ContentPage>

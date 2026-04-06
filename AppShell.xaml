@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="SkyeMusicCompanion.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:SkyeMusicCompanion"
+    Title="SkyeMusicCompanion"
+    Shell.FlyoutBehavior="Flyout">
+
+    <!-- Home -->
+    <FlyoutItem Title="Home" Route="MainPage">
+        <ShellContent ContentTemplate="{DataTemplate local:MainPage}" />
+    </FlyoutItem>
+
+    <!-- Reconnect (hidden by default) -->
+    <FlyoutItem
+        x:Name="ReconnectItem"
+        Title="Reconnect"
+        Route="ReconnectRoute"
+        IsVisible="False">
+        <ShellContent>
+            <ContentPage />
+        </ShellContent>
+    </FlyoutItem>
+    
+    <!-- View Log -->
+    <FlyoutItem Title="View Log" Route="LogPage">
+        <ShellContent ContentTemplate="{DataTemplate local:LogPage}" />
+    </FlyoutItem>
+
+    <!-- Settings -->
+    <FlyoutItem Title="Settings" Route="SettingsPage">
+        <ShellContent ContentTemplate="{DataTemplate local:SettingsPage}" />
+    </FlyoutItem>
+
+</Shell>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SkyeMusicCompanion.LogPage">
+
+    <Grid RowDefinitions="Auto,*" Padding="20">
+        <Button Grid.Row="0"
+                Text="Clear Log"
+                Clicked="OnClearLogClicked"
+                Margin="0,0,0,40" />
+        <BoxView HeightRequest="1"
+                 BackgroundColor="#404040"
+                 Margin="0,0,0,20"
+                 Grid.Row="0"
+                 VerticalOptions="End" />
+        <ScrollView Grid.Row="1"
+                    x:Name="LogScroll">
+                    <Label x:Name="LogLabel"
+                        FontFamily="monospace"
+                        FontSize="14"
+                        LineBreakMode="WordWrap" />
+        </ScrollView>
+    </Grid>
+
+</ContentPage>
