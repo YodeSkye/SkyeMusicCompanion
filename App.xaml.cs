@@ -12,6 +12,17 @@ namespace SkyeMusicCompanion
         {
             InitializeComponent();
             Application.Current!.UserAppTheme = AppTheme.Unspecified;
+
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                Log.Write("UNHANDLED: " + e.ExceptionObject);
+            };
+            TaskScheduler.UnobservedTaskException += (s, e) =>
+            {
+                Log.Write("UNOBSERVED: " + e.Exception);
+                e.SetObserved();
+            };
+
         }
         protected override Window CreateWindow(IActivationState? activationState)
         {
@@ -32,116 +43,134 @@ namespace SkyeMusicCompanion
             _ = Connection.ConnectAsync(Settings.HostServerIp, Settings.HostServerPort);
 
         }
-
-        private void OnConnected()
+        public static void OnUI(Action action)
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                var root = Application.Current?.Windows[0].Page;
-
-                if (root is MainPage mp)
+                try
                 {
-                    mp.SetConnectionState(true);
+                    action();
                 }
-                else if (root is NavigationPage nav && nav.CurrentPage is MainPage mp2)
+                catch (Exception ex)
                 {
-                    mp2.SetConnectionState(true);
-                }
-                else if (root is Shell shell && shell.CurrentPage is MainPage mp3)
-                {
-                    mp3.SetConnectionState(true);
+                    Log.Write("UI error: " + ex);
                 }
             });
-            var shell = Application.Current?.Windows[0].Page as AppShell;
-            shell?.SetReconnectVisible(false);
+        }
+        public static MainPage? GetMainPage()
+        {
+            var win = Application.Current?.Windows.FirstOrDefault();
+            if (win?.Page is MainPage mp)
+                return mp;
+
+            if (win?.Page is NavigationPage nav && nav.CurrentPage is MainPage mp2)
+                return mp2;
+
+            if (win?.Page is Shell shell && shell.CurrentPage is MainPage mp3)
+                return mp3;
+
+            return null;
+        }
+
+        //private void OnConnected()
+        //{
+        //    MainThread.BeginInvokeOnMainThread(() =>
+        //    {
+        //        var root = Application.Current?.Windows[0].Page;
+
+        //        if (root is MainPage mp)
+        //        {
+        //            mp.SetConnectionState(true);
+        //        }
+        //        else if (root is NavigationPage nav && nav.CurrentPage is MainPage mp2)
+        //        {
+        //            mp2.SetConnectionState(true);
+        //        }
+        //        else if (root is Shell shell && shell.CurrentPage is MainPage mp3)
+        //        {
+        //            mp3.SetConnectionState(true);
+        //        }
+        //    });
+        //    var shell = Application.Current?.Windows[0].Page as AppShell;
+        //    shell?.SetReconnectVisible(false);
+        //}
+        private void OnConnected()
+        {
+            OnUI(() =>
+            {
+                var mp = GetMainPage();
+                if (mp == null) return;
+
+                mp.SetConnectionState(true);
+            });
+
+            OnUI(() =>
+            {
+                if (Application.Current?.Windows.FirstOrDefault()?.Page is AppShell shell)
+                    shell.SetReconnectVisible(false);
+            });
         }
         private void OnDisconnected()
         {
-            MainThread.BeginInvokeOnMainThread(() =>
+            OnUI(() =>
             {
-                var root = Application.Current?.Windows[0].Page;
+                var mp = GetMainPage();
+                if (mp == null) return;
 
-                if (root is MainPage mp)
-                {
-                    mp.SetConnectionState(false);
-                    mp.ClearNowPlaying();
-                }
-                else if (root is NavigationPage nav && nav.CurrentPage is MainPage mp2)
-                {
-                    mp2.SetConnectionState(false);
-                    mp2.ClearNowPlaying();
-                }
-                else if (root is Shell shell && shell.CurrentPage is MainPage mp3)
-                {
-                    mp3.SetConnectionState(false);
-                    mp3.ClearNowPlaying();
-                }
+                mp.SetConnectionState(false);
+                mp.ClearNowPlaying();
             });
-            var shell = Application.Current?.Windows[0].Page as AppShell;
-            shell?.SetReconnectVisible(true);
+
+            OnUI(() =>
+            {
+                if (Application.Current?.Windows.FirstOrDefault()?.Page is AppShell shell)
+                    shell.SetReconnectVisible(true);
+            });
         }
         private void OnServerClosing()
         {
-            MainThread.BeginInvokeOnMainThread(() =>
+            OnUI(() =>
             {
-                var root = Application.Current?.Windows[0].Page;
+                var mp = GetMainPage();
+                if (mp == null) return;
 
-                if (root is MainPage mp)
-                {
-                    mp.SetConnectionState(false);
-                    mp.ClearNowPlaying();
-                }
-                else if (root is NavigationPage nav && nav.CurrentPage is MainPage mp2)
-                {
-                    mp2.SetConnectionState(false);
-                    mp2.ClearNowPlaying();
-                }
-                else if (root is Shell shell && shell.CurrentPage is MainPage mp3)
-                {
-                    mp3.SetConnectionState(false);
-                    mp3.ClearNowPlaying();
-                }
+                mp.SetConnectionState(false);
+                mp.ClearNowPlaying();
             });
 
-            // Close socket cleanly
             Connection.Disconnect();
 
-            var shell = Application.Current?.Windows[0].Page as AppShell;
-            shell?.SetReconnectVisible(true);
+            OnUI(() =>
+            {
+                if (Application.Current?.Windows.FirstOrDefault()?.Page is AppShell shell)
+                    shell.SetReconnectVisible(true);
+            });
 
             Log.Write("SERVER CLOSING — Companion disconnected gracefully.");
         }
         private void OnNowPlayingReceived(string payload)
         {
             var now = NowPlayingParser.Parse(payload);
-            Log.Write("ONNOWPLAYINGRECEIVED" + Environment.NewLine + $"{now.CurrentTitle}" + Environment.NewLine + $"{now.Title}" + Environment.NewLine + $"{now.Path}" + Environment.NewLine + $"{now.ArtworkBase64?.Length ?? 0}" + Environment.NewLine + $"{now.Position}" + Environment.NewLine + $"{now.Duration}");
-            MainThread.BeginInvokeOnMainThread(() =>
+            Log.Write("ONNOWPLAYINGRECEIVED" + Environment.NewLine +
+                      $"{now.CurrentTitle}" + Environment.NewLine +
+                      $"{now.Title}" + Environment.NewLine +
+                      $"{now.Path}" + Environment.NewLine +
+                      $"{now.ArtworkBase64?.Length ?? 0}" + Environment.NewLine +
+                      $"{now.Position}" + Environment.NewLine +
+                      $"{now.Duration}");
+
+            OnUI(() =>
             {
-                var root = Application.Current?.Windows[0].Page;
+                var mp = GetMainPage();
+                if (mp == null) return;
 
-                if (root is MainPage mp)
-                {
-                    mp.UpdateNowPlaying(now);
-                    return;
-                }
-
-                if (root is NavigationPage nav && nav.CurrentPage is MainPage mp2)
-                {
-                    mp2.UpdateNowPlaying(now);
-                    return;
-                }
-
-                if (root is Shell shell && shell.CurrentPage is MainPage mp3)
-                {
-                    mp3.UpdateNowPlaying(now);
-                    return;
-                }
+                mp.UpdateNowPlaying(now);
             });
-
         }
         private void OnUnknownMessageReceived(string type)
         {
             Log.Write("UNKNOWN MESSAGE: " + type);
         }
+
     }
 }
