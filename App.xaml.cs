@@ -43,6 +43,7 @@ namespace SkyeMusicCompanion
             _ = Connection.ConnectAsync(Settings.HostServerIp, Settings.HostServerPort);
 
         }
+       
         public static void OnUI(Action action)
         {
             MainThread.BeginInvokeOnMainThread(() =>
@@ -72,28 +73,6 @@ namespace SkyeMusicCompanion
             return null;
         }
 
-        //private void OnConnected()
-        //{
-        //    MainThread.BeginInvokeOnMainThread(() =>
-        //    {
-        //        var root = Application.Current?.Windows[0].Page;
-
-        //        if (root is MainPage mp)
-        //        {
-        //            mp.SetConnectionState(true);
-        //        }
-        //        else if (root is NavigationPage nav && nav.CurrentPage is MainPage mp2)
-        //        {
-        //            mp2.SetConnectionState(true);
-        //        }
-        //        else if (root is Shell shell && shell.CurrentPage is MainPage mp3)
-        //        {
-        //            mp3.SetConnectionState(true);
-        //        }
-        //    });
-        //    var shell = Application.Current?.Windows[0].Page as AppShell;
-        //    shell?.SetReconnectVisible(false);
-        //}
         private void OnConnected()
         {
             OnUI(() =>
