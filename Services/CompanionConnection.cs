@@ -81,8 +81,11 @@ namespace SkyeMusicCompanion.Services
                 {
                     var line = await reader.ReadLineAsync(token);
                     if (line == null)
-                        break;
-
+                    {
+                        Log.Write("Client disconnected (EOF).");
+                        Disconnected?.Invoke();
+                        return;
+                    }
                     // Split once to detect message type
                     var parts = line.Split('|');
                     var type = parts[0];
@@ -112,6 +115,7 @@ namespace SkyeMusicCompanion.Services
             catch (Exception ex)
             {
                 Log.Write("Listen error: " + ex.Message);
+                Disconnected?.Invoke();
             }
         }
         public async Task SendHelloAsync()
@@ -142,6 +146,7 @@ namespace SkyeMusicCompanion.Services
             catch (Exception ex)
             {
                 Log.Write("Send error: " + ex.Message);
+                Disconnected?.Invoke();
             }
         }
         public void RequestNowPlaying()
