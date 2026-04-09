@@ -12,6 +12,7 @@ public partial class SettingsPage : ContentPage
         // Load saved values
         IpEntry.Text = Settings.HostServerIp;
         PortEntry.Text = Settings.HostServerPort.ToString();
+        KeepAwakeSwitch.IsToggled = Settings.KeepScreenAwake;
     }
     protected override async void OnDisappearing()
     {
@@ -33,6 +34,7 @@ public partial class SettingsPage : ContentPage
     private void OnKeepAwakeToggled(object sender, ToggledEventArgs e)
     {
         Settings.KeepScreenAwake = e.Value;
+        ScreenBehaviorManager.ApplyBehavior();
         Log.Write("SETTINGS: KeepScreenAwake toggled to " + e.Value);
     }
 }

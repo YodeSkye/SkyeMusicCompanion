@@ -29,6 +29,7 @@ namespace SkyeMusicCompanion.Services
                 _client = new TcpClient();
                 await _client.ConnectAsync(host, port);
                 Connected?.Invoke();
+                ScreenBehaviorManager.ApplyBehavior();
 
                 _writer = new StreamWriter(_client.GetStream())
                 {
@@ -66,6 +67,7 @@ namespace SkyeMusicCompanion.Services
             try { _cts?.Cancel(); } catch { }
             try { _client?.Close(); } catch { }
             Disconnected?.Invoke();
+            ScreenBehaviorManager.ResetToSystem();
 
             _cts = null;
             _client = null;
@@ -84,6 +86,7 @@ namespace SkyeMusicCompanion.Services
                     {
                         Log.Write("Client disconnected (EOF).");
                         Disconnected?.Invoke();
+                        ScreenBehaviorManager.ResetToSystem();
                         return;
                     }
                     // Split once to detect message type
@@ -116,6 +119,7 @@ namespace SkyeMusicCompanion.Services
             {
                 Log.Write("Listen error: " + ex.Message);
                 Disconnected?.Invoke();
+                ScreenBehaviorManager.ResetToSystem();
             }
         }
         public async Task SendHelloAsync()
@@ -147,6 +151,7 @@ namespace SkyeMusicCompanion.Services
             {
                 Log.Write("Send error: " + ex.Message);
                 Disconnected?.Invoke();
+                ScreenBehaviorManager.ResetToSystem();
             }
         }
         public void RequestNowPlaying()
