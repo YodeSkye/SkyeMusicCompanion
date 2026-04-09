@@ -11,7 +11,6 @@ namespace SkyeMusicCompanion
         public App()
         {
             InitializeComponent();
-            Application.Current!.UserAppTheme = AppTheme.Unspecified;
 
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
@@ -22,6 +21,8 @@ namespace SkyeMusicCompanion
                 Log.Write("UNOBSERVED: " + e.Exception);
                 e.SetObserved();
             };
+            
+            Application.Current!.UserAppTheme = AppTheme.Unspecified;
 
         }
         protected override Window CreateWindow(IActivationState? activationState)

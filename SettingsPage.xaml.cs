@@ -30,4 +30,9 @@ public partial class SettingsPage : ContentPage
         if (int.TryParse(PortEntry.Text, out int port))
             Settings.HostServerPort = port;
     }
+    private void OnKeepAwakeToggled(object sender, ToggledEventArgs e)
+    {
+        Settings.KeepScreenAwake = e.Value;
+        Log.Write("SETTINGS: KeepScreenAwake toggled to " + e.Value);
+    }
 }

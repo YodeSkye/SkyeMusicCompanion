@@ -10,7 +10,6 @@
         <VerticalStackLayout Spacing="0">
             <Label Text="Host Server IP"
                    FontAttributes="Bold" />
-
             <Entry x:Name="IpEntry"
                    Placeholder="192.168.1.100"
                    Keyboard="Numeric"
@@ -21,13 +20,27 @@
         <VerticalStackLayout Spacing="0">
             <Label Text="Host Server Port"
                    FontAttributes="Bold" />
-
             <Entry x:Name="PortEntry"
                    Placeholder="5000"
                    Keyboard="Numeric"
                    Unfocused="OnPortChanged" />
         </VerticalStackLayout>
 
+        <!-- Keep Screen Awake Group -->
+        <HorizontalStackLayout Padding="0,10">
+            <Label Text="Keep Screen Awake"
+                VerticalOptions="Center" />
+            <Switch x:Name="KeepAwakeSwitch"
+                IsToggled="{x:Binding KeepScreenAwake}"
+                Toggled="OnKeepAwakeToggled"
+                HorizontalOptions="End" />
+        </HorizontalStackLayout>
+        <Label Text="Keeps the screen from turning off while connected. 
+When plugged in: stays fully bright. 
+When on battery: stays on but dims normally."
+            FontSize="12"
+            TextColor="Gray"
+            Margin="0,-45,0,10" />
     </VerticalStackLayout>
 
 </ContentPage>
