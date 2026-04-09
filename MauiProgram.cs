@@ -30,8 +30,8 @@ namespace SkyeMusicCompanion
             // Enforce minimum size manually
             window.SizeChanged += (s, e) =>
             {
-                int minWidth = 400;
-                int minHeight = 800;
+                int minWidth = 350;
+                int minHeight = 600;
 
                 var size = appWindow.Size;
 

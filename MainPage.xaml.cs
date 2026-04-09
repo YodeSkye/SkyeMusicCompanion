@@ -34,8 +34,10 @@ namespace SkyeMusicCompanion
         public async void UpdateNowPlaying(NowPlaying now)
         {
             // Basic text fields
-            PlayStateLabel.Text = now.PlayState;
-            CurrentTitleLabel.Text = now.CurrentTitle;
+            bool isPlaying = now.PlayState.Equals("Playing", StringComparison.OrdinalIgnoreCase);
+            PlayStateLabel.Text = isPlaying
+                ? $"{now.PlayState} ({FormatTime(now.Duration)})"
+                : now.PlayState; CurrentTitleLabel.Text = now.CurrentTitle;
             TitleLabel.Text = now.Title;
 
             // Duration + Position (convert seconds → mm:ss)
