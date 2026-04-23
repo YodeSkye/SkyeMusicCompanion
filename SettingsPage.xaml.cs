@@ -37,4 +37,27 @@ public partial class SettingsPage : ContentPage
         ScreenBehaviorManager.ApplyBehavior();
         Log.Write("SETTINGS: KeepScreenAwake toggled to " + e.Value);
     }
+    private async void OnDeleteLogFileClicked(object sender, EventArgs e)
+    {
+        bool confirm = await DisplayAlertAsync(
+            "Delete Log File",
+            "This will permanently delete the Companion log file. Continue?",
+            "Delete",
+            "Cancel"
+        );
+
+        if (!confirm)
+            return;
+
+        try
+        {
+            Log.Clear();   // new helper method
+            await DisplayAlertAsync("Done", "Log file deleted.", "OK");
+        }
+        catch (Exception ex)
+        {
+            Log.Write("DeleteLogFile error: " + ex);
+            await DisplayAlertAsync("Error", ex.Message, "OK");
+        }
+    }
 }

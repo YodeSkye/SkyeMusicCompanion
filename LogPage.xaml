@@ -4,27 +4,25 @@
              x:Class="SkyeMusicCompanion.LogPage">
 
     <Grid RowDefinitions="Auto,Auto,*" Padding="20">
+
         <Button Grid.Row="0"
                 Text="Clear Log"
                 Clicked="OnClearLogClicked"
                 Margin="0,0,0,5" />
+
         <Button Grid.Row="1"
                 Text="Save Log As..."
                 Clicked="OnSaveLogClicked"
                 Margin="0,0,0,40" />
-        <BoxView HeightRequest="1"
-                 BackgroundColor="#404040"
-                 Margin="0,0,0,20"
-                 Grid.Row="1"
-                 VerticalOptions="End" />
+
         <ScrollView Grid.Row="2"
                     x:Name="LogScroll">
-                    <Editor x:Name="LogEditor"
-                            IsReadOnly="True"
-                            FontFamily="monospace"
-                            FontSize="14"
-                            AutoSize="TextChanges" />
+            <Label x:Name="LogLabel"
+                   FontFamily="monospace"
+                   FontSize="14"
+                   LineBreakMode="WordWrap" />
         </ScrollView>
+
     </Grid>
 
 </ContentPage>

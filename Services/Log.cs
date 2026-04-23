@@ -5,7 +5,7 @@ namespace SkyeMusicCompanion.Services;
 
 public static class Log
 {
-    private static string LogPath => Path.Combine(FileSystem.AppDataDirectory, "companion_log.txt");
+    public static string LogPath => Path.Combine(FileSystem.AppDataDirectory, "companion_log.txt");
 
     public static string GetLogPath() => LogPath;
     public static void Write(string message)

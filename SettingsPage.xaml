@@ -44,6 +44,11 @@ When on battery: stays on but dims normally."
             FontSize="12"
             TextColor="Gray"
             Margin="0,-45,0,10" />
+        <Button Text="Delete Log File"
+            Margin="0,20,0,0"
+            BackgroundColor="#802020"
+            TextColor="White"
+            Clicked="OnDeleteLogFileClicked" />
     </VerticalStackLayout>
 
 </ContentPage>
