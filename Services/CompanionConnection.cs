@@ -19,6 +19,8 @@ namespace SkyeMusicCompanion.Services
         public event Action<string>? PlaylistReceived;
         public event Action<string>? StreamInfoReceived;
         public event Action<string>? UnknownMessageReceived;
+        public event Action<string>? VolumeReceived;
+        public event Action<string>? MuteReceived;
 
         public async Task ConnectAsync(string host, int port)
         {
@@ -43,8 +45,9 @@ namespace SkyeMusicCompanion.Services
 
                 // Ask the server for the current state
                 RequestNowPlaying();
-
-           }
+                RequestVolume();
+                RequestMute();
+            }
             catch (Exception ex)
             {
                 Log.Write("Connection error: " + ex.Message);
@@ -91,7 +94,7 @@ namespace SkyeMusicCompanion.Services
                     }
                     // Split once to detect message type
                     var parts = line.Split('|');
-                    var type = parts[0];
+                    var type = parts[0].ToUpperInvariant();
 
                     switch (type)
                     {
@@ -104,7 +107,13 @@ namespace SkyeMusicCompanion.Services
                         case "STREAMINFO":
                             StreamInfoReceived?.Invoke(line);
                             break;
-                        case "serverclosing":
+                        case "VOL":
+                            VolumeReceived?.Invoke(line);
+                            break;
+                        case "MUTE":
+                            MuteReceived?.Invoke(line);
+                            break;
+                        case "SERVERCLOSING":
                             ServerClosing?.Invoke();
                             break;
                         default:
@@ -139,6 +148,22 @@ namespace SkyeMusicCompanion.Services
             {
                 Log.Write("SendHelloAsync error: " + ex.Message);
             }
+        }
+        public void RequestVolume()
+        {
+            SendCommand("vol");
+        }
+        public void SetVolume(int percent)
+        {
+            SendCommand($"volset|{percent}");
+        }
+        public void RequestMute()
+        {
+            SendCommand("mute");
+        }
+        public void SetMute(bool value)
+        {
+            SendCommand($"muteset|{value.ToString().ToLower()}");
         }
         public void SendCommand(string cmd)
         {

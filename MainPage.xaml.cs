@@ -6,6 +6,11 @@ namespace SkyeMusicCompanion
 {
     public partial class MainPage : ContentPage
     {
+
+        private bool _isMuted;
+        private bool _suppressVolumeEvent; // prevents feedback loop
+        private int _lastSentVolume = -1;
+
         public MainPage()
         {
             InitializeComponent();
@@ -14,10 +19,25 @@ namespace SkyeMusicCompanion
         {
             base.OnAppearing();
 
+            App.Connection.Connected += OnConnected;
+            App.Connection.Disconnected += OnDisconnected;
             bool isConnected = App.Connection.IsConnected;
             SetConnectionState(isConnected);
-
+   
+            App.Connection.VolumeReceived += OnVolumeReceived;
+            App.Connection.MuteReceived += OnMuteReceived;
+            
             App.Connection.RequestNowPlaying();
+            App.Connection.RequestVolume();
+            App.Connection.RequestMute();
+          
+      }
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+
+            App.Connection.VolumeReceived -= OnVolumeReceived;
+            App.Connection.MuteReceived -= OnMuteReceived;
         }
 
         public void SetConnectionState(bool connected)
@@ -107,7 +127,7 @@ namespace SkyeMusicCompanion
             ArtworkImage.Source = null;
             ArtworkImage.IsVisible = false;
         }
-        private string FormatTime(int seconds)
+        private static string FormatTime(int seconds)
         {
             if (seconds <= 0)
                 return "0:00";
@@ -116,6 +136,91 @@ namespace SkyeMusicCompanion
             return $"{(int)ts.TotalMinutes}:{ts.Seconds:D2}";
         }
 
+        private void OnConnected()
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                VolumeSlider.IsEnabled = true;
+                MuteButton.IsEnabled = true;
+
+                // Ask server for real state
+                //App.Connection.RequestVolume();
+                //App.Connection.RequestMute();
+            });
+        }
+        private void OnDisconnected()
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                // Reset volume slider
+                VolumeSlider.Value = 0;
+
+                // Reset mute state
+                _isMuted = false;
+                MuteButton.ImageSource = "volume.png";
+
+                // Disable controls (optional but recommended)
+                VolumeSlider.IsEnabled = false;
+                MuteButton.IsEnabled = false;
+
+            });
+        }
+        private void OnVolumeReceived(string line)
+        {
+            var parts = line.Split('|');
+            if (parts.Length == 2 && int.TryParse(parts[1], out int percent))
+            {
+                float vol = percent / 100f;
+
+                Dispatcher.Dispatch(() =>
+                {
+                    _suppressVolumeEvent = true;
+                    VolumeSlider.Value = vol;
+                    _suppressVolumeEvent = false;
+                });
+            }
+        }
+        private void OnMuteReceived(string line)
+        {
+            var parts = line.Split('|');
+            if (parts.Length == 2 && bool.TryParse(parts[1], out bool muted))
+            {
+                Dispatcher.Dispatch(() =>
+                {
+                    _isMuted = muted;
+                    MuteButton.ImageSource = muted ? "volumemute.png" : "volume.png";
+                });
+            }
+        }
+        private void OnVolumeSliderChanged(object sender, ValueChangedEventArgs e)
+        {
+            if (_suppressVolumeEvent)
+                return;
+
+            float v = (float)e.NewValue;
+            int percent = (int)(v * 100);
+
+            if (percent == _lastSentVolume)
+                return;
+
+            _lastSentVolume = percent;
+
+            App.Connection.SetVolume(percent);
+        }
+        //private void OnVolumeSliderChanged(object sender, ValueChangedEventArgs e)
+        //{
+        //    if (_suppressVolumeEvent)
+        //        return;
+
+        //    float v = (float)e.NewValue;
+        //    int percent = (int)(v * 100);
+
+        //    App.Connection.SetVolume(percent);
+        //}
+        private void OnMuteClicked(object sender, EventArgs e)
+        {
+            App.Connection.SetMute(!_isMuted);
+        }
         private async void OnToggleClicked(object sender, EventArgs e)
         {
             App.Connection.SendCommand("toggle");
