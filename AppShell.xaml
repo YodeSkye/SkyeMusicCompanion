@@ -22,7 +22,12 @@
             <ContentPage />
         </ShellContent>
     </FlyoutItem>
-    
+
+    <!-- Playlist -->
+    <FlyoutItem Title="Playlist" Route="PlaylistPage">
+        <ShellContent ContentTemplate="{DataTemplate local:PlaylistPage}" />
+    </FlyoutItem>
+
     <!-- View Log -->
     <FlyoutItem Title="View Log" Route="LogPage">
         <ShellContent ContentTemplate="{DataTemplate local:LogPage}" />

@@ -16,11 +16,13 @@ namespace SkyeMusicCompanion.Services
         public event Action? Disconnected;
         public event Action? ServerClosing;
         public event Action<string>? NowPlayingReceived;
-        public event Action<string>? PlaylistReceived;
+        //public event Action<string>? PlaylistReceived;
         public event Action<string>? StreamInfoReceived;
         public event Action<string>? UnknownMessageReceived;
         public event Action<string>? VolumeReceived;
         public event Action<string>? MuteReceived;
+        public event Action<string>? PlaylistReceived;
+        public event Action? PlaylistChanged;
 
         public async Task ConnectAsync(string host, int port)
         {
@@ -85,6 +87,8 @@ namespace SkyeMusicCompanion.Services
                 while (!token.IsCancellationRequested)
                 {
                     var line = await reader.ReadLineAsync(token);
+                    //Log.Write("RAW: " + (line ?? "<NULL>"));
+
                     if (line == null)
                     {
                         Log.Write("Client disconnected (EOF).");
@@ -101,9 +105,9 @@ namespace SkyeMusicCompanion.Services
                         case "NOWPLAYING":
                             NowPlayingReceived?.Invoke(line);
                             break;
-                        case "PLAYLIST":
-                            PlaylistReceived?.Invoke(line);
-                            break;
+                        //case "PLAYLIST":
+                        //    PlaylistReceived?.Invoke(line);
+                        //    break;
                         case "STREAMINFO":
                             StreamInfoReceived?.Invoke(line);
                             break;
@@ -115,6 +119,12 @@ namespace SkyeMusicCompanion.Services
                             break;
                         case "SERVERCLOSING":
                             ServerClosing?.Invoke();
+                            break;
+                        case "PLAYLIST":
+                            PlaylistReceived?.Invoke(parts.Length > 1 ? parts[1] : "");
+                            break;
+                        case "PLAYLIST_CHANGED":
+                            PlaylistChanged?.Invoke();
                             break;
                         default:
                             UnknownMessageReceived?.Invoke(type);
@@ -164,6 +174,14 @@ namespace SkyeMusicCompanion.Services
         public void SetMute(bool value)
         {
             SendCommand($"muteset|{value.ToString().ToLower()}");
+        }
+        public void RequestPlaylist()
+        {
+            SendCommand("PLAYLIST");
+        }
+        public void PlayPath(string path)
+        {
+            SendCommand($"PLAYPATH|{path}");
         }
         public void SendCommand(string cmd)
         {
