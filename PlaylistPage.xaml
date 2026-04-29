@@ -3,6 +3,10 @@
     x:Class="SkyeMusicCompanion.PlaylistPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://schemas.microsoft.com/dotnet/2021/maui/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    x:DataType="x:Object"
     Title="Playlist">
 
     <CollectionView x:Name="PlaylistView"
