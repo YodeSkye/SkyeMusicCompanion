@@ -1,6 +1,7 @@
 ﻿
 using System.Net.Sockets;
 using SkyeMusicCompanion.Helpers;
+using SkyeMusicCompanion.Models;
 
 namespace SkyeMusicCompanion.Services
 {
@@ -11,12 +12,12 @@ namespace SkyeMusicCompanion.Services
         private CancellationTokenSource? _cts;
 
         public bool IsConnected => _client != null && _client.Connected;
+        public NowPlaying now = new();
 
         public event Action? Connected;
         public event Action? Disconnected;
         public event Action? ServerClosing;
-        public event Action<string>? NowPlayingReceived;
-        //public event Action<string>? PlaylistReceived;
+        public event Action? NowPlayingReceived;
         public event Action<string>? StreamInfoReceived;
         public event Action<string>? UnknownMessageReceived;
         public event Action<string>? VolumeReceived;
@@ -103,11 +104,9 @@ namespace SkyeMusicCompanion.Services
                     switch (type)
                     {
                         case "NOWPLAYING":
-                            NowPlayingReceived?.Invoke(line);
+                            now = NowPlayingParser.Parse(line);
+                            NowPlayingReceived?.Invoke();
                             break;
-                        //case "PLAYLIST":
-                        //    PlaylistReceived?.Invoke(line);
-                        //    break;
                         case "STREAMINFO":
                             StreamInfoReceived?.Invoke(line);
                             break;

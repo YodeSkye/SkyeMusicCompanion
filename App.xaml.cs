@@ -61,7 +61,7 @@ namespace SkyeMusicCompanion
         }
         public static MainPage? GetMainPage()
         {
-            var win = Application.Current?.Windows.FirstOrDefault();
+            var win = Application.Current?.Windows[0];
             if (win?.Page is MainPage mp)
                 return mp;
 
@@ -86,7 +86,7 @@ namespace SkyeMusicCompanion
 
             OnUI(() =>
             {
-                if (Application.Current?.Windows.FirstOrDefault()?.Page is AppShell shell)
+                if (Application.Current?.Windows[0]?.Page is AppShell shell)
                     shell.SetReconnectVisible(false);
             });
         }
@@ -103,7 +103,7 @@ namespace SkyeMusicCompanion
 
             OnUI(() =>
             {
-                if (Application.Current?.Windows.FirstOrDefault()?.Page is AppShell shell)
+                if (Application.Current?.Windows[0]?.Page is AppShell shell)
                     shell.SetReconnectVisible(true);
             });
         }
@@ -122,29 +122,28 @@ namespace SkyeMusicCompanion
 
             OnUI(() =>
             {
-                if (Application.Current?.Windows.FirstOrDefault()?.Page is AppShell shell)
+                if (Application.Current?.Windows[0]?.Page is AppShell shell)
                     shell.SetReconnectVisible(true);
             });
 
             Log.Write("SERVER CLOSING — Companion disconnected gracefully.");
         }
-        private void OnNowPlayingReceived(string payload)
+        private void OnNowPlayingReceived()
         {
-            var now = NowPlayingParser.Parse(payload);
             Log.Write("ONNOWPLAYINGRECEIVED" + Environment.NewLine +
-                      $"{now.CurrentTitle}" + Environment.NewLine +
-                      $"{now.Title}" + Environment.NewLine +
-                      $"{now.Path}" + Environment.NewLine +
-                      $"{now.ArtworkBase64?.Length ?? 0}" + Environment.NewLine +
-                      $"{now.Position}" + Environment.NewLine +
-                      $"{now.Duration}");
+                      $"{Connection.now.CurrentTitle}" + Environment.NewLine +
+                      $"{Connection.now.Title}" + Environment.NewLine +
+                      $"{Connection.now.Path}" + Environment.NewLine +
+                      $"{Connection.now.ArtworkBase64?.Length ?? 0}" + Environment.NewLine +
+                      $"{Connection.now.Position}" + Environment.NewLine +
+                      $"{Connection.now.Duration}");
 
             OnUI(() =>
             {
                 var mp = GetMainPage();
                 if (mp == null) return;
 
-                mp.UpdateNowPlaying(now);
+                mp.UpdateNowPlaying(Connection.now);
             });
         }
         private void OnUnknownMessageReceived(string type)
