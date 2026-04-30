@@ -8,7 +8,7 @@
     Shell.FlyoutBehavior="Flyout">
 
     <!-- Home -->
-    <FlyoutItem Title="Home" Route="MainPage">
+    <FlyoutItem Title="Home" Route="MainPage" Icon="app.png">
         <ShellContent ContentTemplate="{DataTemplate local:MainPage}" />
     </FlyoutItem>
 
@@ -17,6 +17,7 @@
         x:Name="ReconnectItem"
         Title="Reconnect"
         Route="ReconnectRoute"
+        Icon="reconnect.png"
         IsVisible="False">
         <ShellContent>
             <ContentPage />
@@ -24,17 +25,17 @@
     </FlyoutItem>
 
     <!-- Playlist -->
-    <FlyoutItem Title="Playlist" Route="PlaylistPage">
+    <FlyoutItem Title="Playlist" Route="PlaylistPage" Icon="playlist.png">
         <ShellContent ContentTemplate="{DataTemplate local:PlaylistPage}" />
     </FlyoutItem>
 
     <!-- View Log -->
-    <FlyoutItem Title="View Log" Route="LogPage">
+    <FlyoutItem Title="View Log" Route="LogPage" Icon="log.png">
         <ShellContent ContentTemplate="{DataTemplate local:LogPage}" />
     </FlyoutItem>
 
     <!-- Settings -->
-    <FlyoutItem Title="Settings" Route="SettingsPage">
+    <FlyoutItem Title="Settings" Route="SettingsPage" Icon="settings.png">
         <ShellContent ContentTemplate="{DataTemplate local:SettingsPage}" />
     </FlyoutItem>
 

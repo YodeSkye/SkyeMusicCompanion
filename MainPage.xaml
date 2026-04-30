@@ -45,6 +45,7 @@
                     <Button Grid.Row="0" Grid.Column="0"
                             x:Name="ToggleLabel"
                             Text="Play"
+                            BackgroundColor="#8b1a10"
                             ImageSource="play32.png"
                             ContentLayout="Left,10"
                             HeightRequest="64"
@@ -52,6 +53,7 @@
 
                     <Button Grid.Row="0" Grid.Column="1"
                             Text="Stop"
+                            BackgroundColor="#8b1a10"
                             ImageSource="stop32.png"
                             ContentLayout="Left,10"
                             HeightRequest="64"
@@ -69,6 +71,7 @@
 
                         <Button Grid.Column="0"
                                 Text="Prev"
+                                BackgroundColor="#8b1a10"
                                 ImageSource="previous32.png"
                                 ContentLayout="Left,10"
                                 HeightRequest="64"
@@ -76,6 +79,7 @@
 
                         <Button Grid.Column="1"
                                 Text="Next"
+                                BackgroundColor="#8b1a10"                                
                                 ImageSource="next32.png"
                                 ContentLayout="Left,10"
                                 HeightRequest="64"
@@ -85,11 +89,12 @@
                     <!-- THIRD ROW: Mute + Volume Slider -->
                     <Grid Grid.Row="2" Grid.ColumnSpan="2"
                           ColumnDefinitions="Auto,*"
-                          Margin="0,10,0,0">
+                          Margin="0,0,0,0">
 
                         <!-- Mute Button -->
                         <Button x:Name="MuteButton"
                                 Grid.Column="0"
+                                BackgroundColor="#8b1a10"
                                 WidthRequest="64"
                                 HeightRequest="64"
                                 Clicked="OnMuteClicked" />
@@ -97,6 +102,8 @@
                         <!-- Volume Slider -->
                         <Slider x:Name="VolumeSlider"
                                 Grid.Column="1"
+                                ThumbColor="#8b1a10"
+                                MinimumTrackColor="#8b1a10"
                                 Minimum="0"
                                 Maximum="1"
                                 Margin="10,0,0,0"
@@ -121,7 +128,7 @@
                 <Image x:Name="ArtworkImage"
                        HeightRequest="350"
                        WidthRequest="350"
-                       Aspect="AspectFill"
+                       Aspect="AspectFit"
                        HorizontalOptions="Center" />
 
                 <!-- POSITION + DURATION -->

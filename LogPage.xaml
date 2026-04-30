@@ -7,11 +7,13 @@
 
         <Button Grid.Row="0"
                 Text="Clear Log"
+                BackgroundColor="#8b1a10"
                 Clicked="OnClearLogClicked"
                 Margin="0,0,0,5" />
 
         <Button Grid.Row="1"
                 Text="Save Log As..."
+                BackgroundColor="#8b1a10"
                 Clicked="OnSaveLogClicked"
                 Margin="0,0,0,40" />
 
