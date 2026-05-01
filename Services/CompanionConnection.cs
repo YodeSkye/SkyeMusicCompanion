@@ -24,6 +24,7 @@ namespace SkyeMusicCompanion.Services
         public event Action<string>? MuteReceived;
         public event Action<string>? PlaylistReceived;
         public event Action? PlaylistChanged;
+        public event Action? PlaylistCleared;
 
         public async Task ConnectAsync(string host, int port)
         {
@@ -72,6 +73,8 @@ namespace SkyeMusicCompanion.Services
         {
             try { _cts?.Cancel(); } catch { }
             try { _client?.Close(); } catch { }
+
+            PlaylistCleared?.Invoke();
             Disconnected?.Invoke();
             ScreenBehaviorManager.ResetToSystem();
 
@@ -93,6 +96,7 @@ namespace SkyeMusicCompanion.Services
                     if (line == null)
                     {
                         Log.Write("Client disconnected (EOF).");
+                        PlaylistCleared?.Invoke();
                         Disconnected?.Invoke();
                         ScreenBehaviorManager.ResetToSystem();
                         return;
@@ -136,6 +140,7 @@ namespace SkyeMusicCompanion.Services
             catch (Exception ex)
             {
                 Log.Write("Listen error: " + ex.Message);
+                PlaylistCleared?.Invoke();
                 Disconnected?.Invoke();
                 ScreenBehaviorManager.ResetToSystem();
             }

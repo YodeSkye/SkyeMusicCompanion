@@ -30,9 +30,13 @@ public partial class PlaylistPage : ContentPage
         _connection.PlaylistReceived += OnPlaylistJsonReceived;
         _connection.PlaylistChanged += OnPlaylistChanged;
         _connection.Disconnected += OnDisconnected;
+        _connection.NowPlayingReceived += OnNowPlayingReceived;
+        _connection.PlaylistCleared += OnPlaylistCleared;
 
         if (_connection.IsConnected)
+        {
             _connection.RequestPlaylist();
+        }
 
     }
     protected override void OnDisappearing()
@@ -42,6 +46,7 @@ public partial class PlaylistPage : ContentPage
         _connection.PlaylistReceived -= OnPlaylistJsonReceived;
         _connection.PlaylistChanged -= OnPlaylistChanged;
         _connection.Disconnected -= OnDisconnected;
+        _connection.NowPlayingReceived -= OnNowPlayingReceived;
 
     }
 
@@ -64,11 +69,22 @@ public partial class PlaylistPage : ContentPage
                 AllItems.AddRange(list);
 
                 ApplyFilter(_currentSearchText);
+                SelectCurrentNowPlaying();
             }
             catch (Exception ex)
             {
                 Log.Write("Playlist JSON error: " + ex.Message);
             }
+        });
+    }
+    private void OnPlaylistCleared()
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            Items.Clear();
+            AllItems.Clear();
+            SearchBox.Text = string.Empty;
+            _currentSearchText = string.Empty;
         });
     }
     private void OnDisconnected()
@@ -85,13 +101,18 @@ public partial class PlaylistPage : ContentPage
             _currentSearchText = string.Empty;
         });
     }
-
-    private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void OnNowPlayingReceived()
     {
-        if (e.CurrentSelection.Count == 0)
+        SelectCurrentNowPlaying();
+    }
+
+    private void OnItemTapped(object sender, TappedEventArgs e)
+    {
+        if (e.Parameter is not PlaylistItem item)
             return;
 
-        var item = (PlaylistItem)e.CurrentSelection[0];
+        PlaylistView.SelectedItem = item;
+
         _connection.PlayPath(item.Path);
     }
     private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
@@ -106,27 +127,44 @@ public partial class PlaylistPage : ContentPage
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            // No filter → show everything
             foreach (var item in AllItems)
                 Items.Add(item);
+        }
+        else
+        {
+            text = text.ToLowerInvariant();
 
+            foreach (var item in AllItems)
+            {
+                if ((item.Title?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (item.Path?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false))
+                {
+                    Items.Add(item);
+                }
+            }
+        }
+
+        SelectCurrentNowPlaying();
+    }
+    private void SelectCurrentNowPlaying()
+    {
+        var now = App.Connection.now;
+
+        // If no NowPlaying, clear selection
+        if (string.IsNullOrWhiteSpace(now.Path))
+        {
+            PlaylistView.SelectedItem = null;
             return;
         }
 
-        text = text.ToLowerInvariant();
+        // Try to find the current song in the *visible* list
+        var match = Items.FirstOrDefault(i => i.Path == now.Path);
 
-        foreach (var item in AllItems)
+        MainThread.BeginInvokeOnMainThread(() =>
         {
-            if (item.Title != null &&
-                item.Title.Contains(text, StringComparison.OrdinalIgnoreCase))
-            {
-                Items.Add(item);
-            }
-            else if (item.Path != null &&
-                     item.Path.Contains(text, StringComparison.OrdinalIgnoreCase))
-            {
-                Items.Add(item);
-            }
-        }
+            // If not found → clear selection
+            PlaylistView.SelectedItem = match;
+        });
     }
+
 }

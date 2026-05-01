@@ -17,12 +17,16 @@
                    TextChanged="OnSearchTextChanged" />
 
         <CollectionView x:Name="PlaylistView"
-                        SelectionMode="Single"
-                        SelectionChanged="OnSelectionChanged">
+                        SelectionMode="Single">
 
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:PlaylistItem">
                     <Grid Padding="10">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer 
+                                Tapped="OnItemTapped"
+                                CommandParameter="{Binding}" />
+                        </Grid.GestureRecognizers>
                         <Label Text="{Binding Title}" FontSize="16" />
                     </Grid>
                 </DataTemplate>
