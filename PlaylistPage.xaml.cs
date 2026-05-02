@@ -1,5 +1,4 @@
 
-using System.Collections.ObjectModel;
 using System.Text.Json;
 using SkyeMusicCompanion.Models;
 using SkyeMusicCompanion.Services;
@@ -9,34 +8,31 @@ namespace SkyeMusicCompanion;
 public partial class PlaylistPage : ContentPage
 {
     private readonly CompanionConnection _connection;
-
-    // Full playlist snapshot
-    private readonly List<PlaylistItem> AllItems = [];
-
-    // Current search text
+    private readonly List<PlaylistItem> _allItems = [];
     private string _currentSearchText = string.Empty;
-
-    // Items bound to the UI
-    public ObservableCollection<PlaylistItem> Items { get; } = [];
-
     private bool _hasLoadedOnce;
+    CancellationTokenSource? _searchCts;
 
     public PlaylistPage()
     {
         InitializeComponent();
 
         _connection = App.Connection;
-        PlaylistView.ItemsSource = Items;
     }
-
     protected override void OnAppearing()
     {
         base.OnAppearing();
 
-        // Only listen for the playlist ONCE
+        // Prevent double-subscribe
+        _connection.PlaylistReceived -= OnPlaylistJsonReceived;
+        _connection.PlaylistCleared -= OnPlaylistCleared;
+        _connection.Disconnected -= OnDisconnected;
+        _connection.NowPlayingReceived -= OnNowPlayingReceived;
+
         _connection.PlaylistReceived += OnPlaylistJsonReceived;
         _connection.PlaylistCleared += OnPlaylistCleared;
         _connection.Disconnected += OnDisconnected;
+        _connection.NowPlayingReceived += OnNowPlayingReceived;
 
         if (!_hasLoadedOnce && _connection.IsConnected)
         {
@@ -44,54 +40,67 @@ public partial class PlaylistPage : ContentPage
             _connection.RequestPlaylist();
         }
     }
-
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
 
+        // Always detach to prevent ghost events
         _connection.PlaylistReceived -= OnPlaylistJsonReceived;
         _connection.PlaylistCleared -= OnPlaylistCleared;
         _connection.Disconnected -= OnDisconnected;
+        _connection.NowPlayingReceived -= OnNowPlayingReceived;
     }
 
     private void OnPlaylistJsonReceived(string json)
     {
-        try
+        MainThread.BeginInvokeOnMainThread(() =>
         {
-            var list = JsonSerializer.Deserialize<List<PlaylistItem>>(json);
-            if (list == null)
-                return;
+            try
+            {
+                var list = JsonSerializer.Deserialize<List<PlaylistItem>>(json);
+                if (list == null)
+                    return;
 
-            AllItems.Clear();
-            AllItems.AddRange(list);
+                _allItems.Clear();
+                _allItems.AddRange(list);
 
-            ApplyFilter(_currentSearchText);
-        }
-        catch (Exception ex)
-        {
-            Log.Write("Playlist JSON error: " + ex.Message);
-        }
+                ApplyFilter(_currentSearchText);
+
+                UpdateHighlight(_connection.now.Path);
+                ScrollToCurrent(_connection.now.Path);
+            }
+            catch (Exception ex)
+            {
+                Log.Write("Playlist JSON error: " + ex.Message);
+            }
+        });
     }
-
     private void OnPlaylistCleared()
     {
-        Items.Clear();
-        AllItems.Clear();
+        _allItems.Clear();
+        PlaylistView.ItemsSource = null;
         SearchBox.Text = string.Empty;
         _currentSearchText = string.Empty;
         _hasLoadedOnce = false;
     }
-
     private async void OnDisconnected()
     {
         if (Shell.Current.CurrentPage is PlaylistPage)
             await Shell.Current.GoToAsync("//MainPage");
 
-        Items.Clear();
-        AllItems.Clear();
+        _allItems.Clear();
+        PlaylistView.ItemsSource = null;
         SearchBox.Text = string.Empty;
         _currentSearchText = string.Empty;
         _hasLoadedOnce = false;
+    }
+    private void OnNowPlayingReceived()
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            UpdateHighlight(_connection.now.Path);
+            ScrollToCurrent(_connection.now.Path);
+        });
     }
 
     private void OnItemTapped(object sender, TappedEventArgs e)
@@ -99,34 +108,64 @@ public partial class PlaylistPage : ContentPage
         if (e.Parameter is PlaylistItem item)
             _connection.PlayPath(item.Path);
     }
-
     private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
     {
-        _currentSearchText = e.NewTextValue ?? string.Empty;
-        ApplyFilter(_currentSearchText);
+        var text = e.NewTextValue ?? string.Empty;
+
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        var token = _searchCts.Token;
+
+        Task.Delay(120, token).ContinueWith(t =>
+        {
+            if (t.IsCanceled)
+                return;
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                _currentSearchText = text;
+                ApplyFilter(text);
+            });
+        });
     }
 
     private void ApplyFilter(string text)
     {
-        Items.Clear();
+        IEnumerable<PlaylistItem> source = _allItems;
 
-        if (string.IsNullOrWhiteSpace(text))
+        if (!string.IsNullOrWhiteSpace(text))
         {
-            foreach (var item in AllItems)
-                Items.Add(item);
-        }
-        else
-        {
-            text = text.ToLowerInvariant();
+            var lower = text.ToLowerInvariant();
 
-            foreach (var item in AllItems)
-            {
-                if ((item.Title?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                    (item.Path?.Contains(text, StringComparison.OrdinalIgnoreCase) ?? false))
-                {
-                    Items.Add(item);
-                }
-            }
+            source = _allItems.Where(item =>
+                (item.Title?.Contains(lower, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (item.Path?.Contains(lower, StringComparison.OrdinalIgnoreCase) ?? false));
         }
+
+        // Build a new list and swap ItemsSource in one shot
+        var viewList = source.ToList();
+        PlaylistView.ItemsSource = viewList;
     }
+    public void UpdateHighlight(string currentPath)
+    {
+        //Log.Write("Highlighting: " + currentPath);
+
+        foreach (var item in _allItems)
+        {
+            item.IsCurrent = (item.Path == currentPath);
+            //if (item.Path == currentPath)
+                //Log.Write("MATCH FOUND: " + item.Title);
+        }
+
+        ApplyFilter(_currentSearchText);
+    }
+    private void ScrollToCurrent(string path)
+    {
+        var index = _allItems.FindIndex(i => i.Path == path);
+        if (index < 0)
+            return;
+
+        PlaylistView.ScrollTo(index, position: ScrollToPosition.Center, animate: false);
+    }
+
 }

@@ -5,5 +5,6 @@ namespace SkyeMusicCompanion.Models
     {
         public string Title { get; set; } = "";
         public string Path { get; set; } = "";
+        public bool IsCurrent { get; set; } = false;
     }
 }
