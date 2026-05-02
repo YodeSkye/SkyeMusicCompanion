@@ -10,14 +10,16 @@
     x:DataType="x:Object"
     Title="Playlist">
 
-    <VerticalStackLayout>
+    <Grid RowDefinitions="Auto,*">
 
         <SearchBar x:Name="SearchBox"
+                   Grid.Row="0"
                    Placeholder="Search"
                    TextChanged="OnSearchTextChanged" />
 
         <CollectionView x:Name="PlaylistView"
-                        SelectionMode="Single">
+                        Grid.Row="1"
+                        SelectionMode="None">
 
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:PlaylistItem">
@@ -27,13 +29,15 @@
                                 Tapped="OnItemTapped"
                                 CommandParameter="{Binding}" />
                         </Grid.GestureRecognizers>
-                        <Label Text="{Binding Title}" FontSize="16" />
+
+                        <Label Text="{Binding Title}"
+                               FontSize="16" />
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
 
         </CollectionView>
 
-    </VerticalStackLayout>
+    </Grid>
 
 </ContentPage>
