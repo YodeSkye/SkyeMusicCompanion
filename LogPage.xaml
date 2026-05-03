@@ -22,10 +22,10 @@
                 ItemsSource="{Binding LogLines}"
                 SelectionMode="None">
             <CollectionView.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="x:String">
                     <Label Text="{Binding}"
-                   FontFamily="monospace"
-                   FontSize="14" />
+                       FontFamily="monospace"
+                       FontSize="14" />
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
