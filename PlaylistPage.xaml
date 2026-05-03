@@ -23,7 +23,12 @@
 
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:PlaylistItem">
-                    <Grid Padding="10">
+                    <Grid Padding="10" BackgroundColor="Transparent">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Tapped="OnItemTapped"
+                                CommandParameter="{Binding}" />
+                        </Grid.GestureRecognizers>
                         <Grid.Triggers>
 
                             <!-- Background highlight -->

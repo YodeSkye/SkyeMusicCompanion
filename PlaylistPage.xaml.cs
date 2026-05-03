@@ -28,11 +28,13 @@ public partial class PlaylistPage : ContentPage
         _connection.PlaylistCleared -= OnPlaylistCleared;
         _connection.Disconnected -= OnDisconnected;
         _connection.NowPlayingReceived -= OnNowPlayingReceived;
+        _connection.PlaylistChanged -= OnPlaylistChanged;
 
         _connection.PlaylistReceived += OnPlaylistJsonReceived;
         _connection.PlaylistCleared += OnPlaylistCleared;
         _connection.Disconnected += OnDisconnected;
         _connection.NowPlayingReceived += OnNowPlayingReceived;
+        _connection.PlaylistChanged += OnPlaylistChanged;
 
         if (!_hasLoadedOnce && _connection.IsConnected)
         {
@@ -49,6 +51,8 @@ public partial class PlaylistPage : ContentPage
         _connection.PlaylistCleared -= OnPlaylistCleared;
         _connection.Disconnected -= OnDisconnected;
         _connection.NowPlayingReceived -= OnNowPlayingReceived;
+        _connection.PlaylistChanged -= OnPlaylistChanged;
+
     }
 
     private void OnPlaylistJsonReceived(string json)
@@ -101,6 +105,14 @@ public partial class PlaylistPage : ContentPage
             UpdateHighlight(_connection.now.Path);
             ScrollToCurrent(_connection.now.Path);
         });
+    }
+    private void OnPlaylistChanged()
+    {
+        // Only refresh if the playlist page is actually visible
+        if (Shell.Current.CurrentPage is PlaylistPage)
+        {
+            _connection.RequestPlaylist();
+        }
     }
 
     private void OnItemTapped(object sender, TappedEventArgs e)
@@ -161,7 +173,20 @@ public partial class PlaylistPage : ContentPage
     }
     private void ScrollToCurrent(string path)
     {
-        var index = _allItems.FindIndex(i => i.Path == path);
+        if (PlaylistView.ItemsSource is not IList<PlaylistItem> visibleList)
+            return;
+
+        var index = -1;
+
+        for (int i = 0; i < visibleList.Count; i++)
+        {
+            if (visibleList[i].Path == path)
+            {
+                index = i;
+                break;
+            }
+        }
+
         if (index < 0)
             return;
 
