@@ -11,7 +11,6 @@ public partial class LogPage : ContentPage
     {
         InitializeComponent();
     }
-
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -27,39 +26,11 @@ public partial class LogPage : ContentPage
         ScrollToBottom();
     }
 
-    private string ReadTruncatedLog()
-    {
-        try
-        {
-            string path = Log.LogPath;
-
-            if (!File.Exists(path))
-                return "(log empty)";
-
-            var bytes = File.ReadAllBytes(path);
-
-            // If file is small, return whole thing
-            if (bytes.Length <= MaxLogBytes)
-                return File.ReadAllText(path);
-
-            // Otherwise truncate from the BEGINNING
-            int start = bytes.Length - MaxLogBytes;
-            var slice = bytes.AsSpan(start);
-
-            return System.Text.Encoding.UTF8.GetString(slice);
-        }
-        catch
-        {
-            return "(error reading log)";
-        }
-    }
-
     private void OnClearLogClicked(object sender, EventArgs e)
     {
         Log.Clear();
         LogLabel.Text = "(log cleared)";
     }
-
     private async void OnSaveLogClicked(object sender, EventArgs e)
     {
         try
@@ -98,6 +69,32 @@ public partial class LogPage : ContentPage
         }
     }
 
+    private string ReadTruncatedLog()
+    {
+        try
+        {
+            string path = Log.LogPath;
+
+            if (!File.Exists(path))
+                return "(log empty)";
+
+            var bytes = File.ReadAllBytes(path);
+
+            // If file is small, return whole thing
+            if (bytes.Length <= MaxLogBytes)
+                return File.ReadAllText(path);
+
+            // Otherwise truncate from the BEGINNING
+            int start = bytes.Length - MaxLogBytes;
+            var slice = bytes.AsSpan(start);
+
+            return System.Text.Encoding.UTF8.GetString(slice);
+        }
+        catch
+        {
+            return "(error reading log)";
+        }
+    }
     private void ScrollToBottom()
     {
         Dispatcher.Dispatch(async () =>
