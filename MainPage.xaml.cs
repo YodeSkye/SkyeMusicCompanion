@@ -66,6 +66,14 @@ namespace SkyeMusicCompanion
             }
             CurrentTitleLabel.Text = now.CurrentTitle;
             TitleLabel.Text = now.Title;
+            if (now.CurrentTitle == now.Title)
+            {    
+                TitleLabel.IsVisible = false;
+            }
+            else
+            {
+                TitleLabel.IsVisible = true;
+            }
 
             // Duration + Position (convert seconds → mm:ss)
             PositionLabel.Text = FormatTime(now.Position);

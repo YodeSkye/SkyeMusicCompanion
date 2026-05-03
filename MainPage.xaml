@@ -99,16 +99,46 @@
                                 HeightRequest="64"
                                 Clicked="OnMuteClicked" />
 
-                        <!-- Volume Slider -->
-                        <Slider x:Name="VolumeSlider"
-                                Grid.Column="1"
-                                ThumbColor="#8b1a10"
-                                MinimumTrackColor="#8b1a10"
+                        <!-- Volume Slider with true 25/50/75% marks -->
+                        <AbsoluteLayout Grid.Column="1"
+                            HeightRequest="40"
+                            Margin="10,0,0,0"
+                            VerticalOptions="Center">
+
+                            <!-- 25% -->
+                            <BoxView Color="#8b1a10"
+                                 WidthRequest="2"
+                                 HeightRequest="10"
+                                 AbsoluteLayout.LayoutBounds="0.25,0.5,2,10"
+                                 AbsoluteLayout.LayoutFlags="PositionProportional" />
+
+                            <!-- 50% -->
+                            <BoxView Color="#8b1a10"
+                                 WidthRequest="3"
+                                 HeightRequest="14"
+                                 AbsoluteLayout.LayoutBounds="0.50,0.5,2,14"
+                                 AbsoluteLayout.LayoutFlags="PositionProportional" />
+
+                            <!-- 75% -->
+                            <BoxView Color="#8b1a10"
+                                 WidthRequest="2"
+                                 HeightRequest="10"
+                                 AbsoluteLayout.LayoutBounds="0.75,0.5,2,10"
+                                 AbsoluteLayout.LayoutFlags="PositionProportional" />
+
+                            <!-- Slider on top -->
+                            <Slider x:Name="VolumeSlider"
                                 Minimum="0"
                                 Maximum="1"
-                                Margin="10,0,0,0"
+                                ThumbColor="#8b1a10"
+                                MinimumTrackColor="#8b1a10"
                                 VerticalOptions="Center"
-                                ValueChanged="OnVolumeSliderChanged" />
+                                ValueChanged="OnVolumeSliderChanged"
+                                AbsoluteLayout.LayoutBounds="0,0,1,1"
+                                AbsoluteLayout.LayoutFlags="All" />
+
+                        </AbsoluteLayout>
+
                     </Grid>
 
                 </Grid>

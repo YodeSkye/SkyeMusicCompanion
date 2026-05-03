@@ -41,6 +41,11 @@ public partial class PlaylistPage : ContentPage
             _hasLoadedOnce = true;
             _connection.RequestPlaylist();
         }
+        if (_connection.now.Path != null)
+        {
+            UpdateHighlight(_connection.now.Path);
+            ScrollToCurrent(_connection.now.Path);
+        }
     }
     protected override void OnDisappearing()
     {
