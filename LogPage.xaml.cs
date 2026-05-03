@@ -1,35 +1,40 @@
 
 using SkyeMusicCompanion.Services;
+using System.Collections.ObjectModel;
 
 namespace SkyeMusicCompanion;
 
 public partial class LogPage : ContentPage
 {
     private const int MaxLogBytes = 200_000; // 200 KB max loaded into UI
+    public ObservableCollection<string> LogLines { get; } = [];
 
     public LogPage()
     {
         InitializeComponent();
+        BindingContext = this;
     }
     protected override async void OnAppearing()
     {
         base.OnAppearing();
 
-        // Let UI render first
         await Task.Delay(50);
 
-        // Load + truncate log asynchronously
-        var text = await Task.Run(() => ReadTruncatedLog());
+        var lines = await Task.Run(() => ReadTruncatedLogLines());
 
-        LogLabel.Text = text;
+        LogLines.Clear();
+        foreach (var line in lines)
+            LogLines.Add(line);
 
-        ScrollToBottom();
+        await Task.Delay(50);
+        LogList.ScrollTo(LogLines.Count - 1, position: ScrollToPosition.End, animate: false);
     }
 
     private void OnClearLogClicked(object sender, EventArgs e)
     {
         Log.Clear();
-        LogLabel.Text = "(log cleared)";
+        LogLines.Clear();
+        LogLines.Add("(log cleared)");
     }
     private async void OnSaveLogClicked(object sender, EventArgs e)
     {
@@ -69,7 +74,7 @@ public partial class LogPage : ContentPage
         }
     }
 
-    private string ReadTruncatedLog()
+    private static string ReadTruncatedLog()
     {
         try
         {
@@ -95,11 +100,10 @@ public partial class LogPage : ContentPage
             return "(error reading log)";
         }
     }
-    private void ScrollToBottom()
+    private static List<string> ReadTruncatedLogLines()
     {
-        Dispatcher.Dispatch(async () =>
-        {
-            await LogScroll.ScrollToAsync(0, LogLabel.Height, false);
-        });
+        var text = ReadTruncatedLog();
+        return text.Split('\n').ToList();
     }
+
 }

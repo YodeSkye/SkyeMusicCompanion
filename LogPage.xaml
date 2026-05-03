@@ -17,13 +17,18 @@
                 Clicked="OnSaveLogClicked"
                 Margin="0,0,0,40" />
 
-        <ScrollView Grid.Row="2"
-                    x:Name="LogScroll">
-            <Label x:Name="LogLabel"
+        <CollectionView x:Name="LogList"
+                Grid.Row="2"
+                ItemsSource="{Binding LogLines}"
+                SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Label Text="{Binding}"
                    FontFamily="monospace"
-                   FontSize="14"
-                   LineBreakMode="WordWrap" />
-        </ScrollView>
+                   FontSize="14" />
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
 
     </Grid>
 
