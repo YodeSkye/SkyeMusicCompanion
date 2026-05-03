@@ -190,7 +190,11 @@ public partial class PlaylistPage : ContentPage
         if (index < 0)
             return;
 
-        PlaylistView.ScrollTo(index, position: ScrollToPosition.Center, animate: false);
+        Dispatcher.Dispatch(async () =>
+        {
+            await Task.Delay(50);
+            PlaylistView.ScrollTo(index, position: ScrollToPosition.Center, animate: false);
+        });
     }
 
 }
