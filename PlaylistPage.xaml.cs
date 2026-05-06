@@ -10,37 +10,49 @@ public partial class PlaylistPage : ContentPage
     private readonly CompanionConnection _connection;
     private readonly List<PlaylistItem> _allItems = [];
     private string _currentSearchText = string.Empty;
-    private bool _hasLoadedOnce;
     CancellationTokenSource? _searchCts;
+    private bool _hasLoadedOnce;
+    private bool _pendingPlaylistRefresh;
 
     public PlaylistPage()
     {
         InitializeComponent();
 
         _connection = App.Connection;
+
+        _connection.PlaylistChanged += OnPlaylistChanged;
     }
     protected override void OnAppearing()
     {
         base.OnAppearing();
 
-        // Prevent double-subscribe
         _connection.PlaylistReceived -= OnPlaylistJsonReceived;
         _connection.PlaylistCleared -= OnPlaylistCleared;
         _connection.Disconnected -= OnDisconnected;
         _connection.NowPlayingReceived -= OnNowPlayingReceived;
-        _connection.PlaylistChanged -= OnPlaylistChanged;
 
         _connection.PlaylistReceived += OnPlaylistJsonReceived;
         _connection.PlaylistCleared += OnPlaylistCleared;
         _connection.Disconnected += OnDisconnected;
         _connection.NowPlayingReceived += OnNowPlayingReceived;
-        _connection.PlaylistChanged += OnPlaylistChanged;
 
+        // handle pending refresh BEFORE anything else
+        if (_pendingPlaylistRefresh)
+        {
+            _pendingPlaylistRefresh = false;
+            _connection.RequestPlaylist();
+            return; // stop here — playlist will arrive momentarily
+        }
+
+        // Load playlist once
         if (!_hasLoadedOnce && _connection.IsConnected)
         {
             _hasLoadedOnce = true;
             _connection.RequestPlaylist();
+            return;
         }
+
+        // Highlight + scroll
         if (_connection.now.Path != null)
         {
             UpdateHighlight(_connection.now.Path);
@@ -51,12 +63,10 @@ public partial class PlaylistPage : ContentPage
     {
         base.OnDisappearing();
 
-        // Always detach to prevent ghost events
         _connection.PlaylistReceived -= OnPlaylistJsonReceived;
         _connection.PlaylistCleared -= OnPlaylistCleared;
         _connection.Disconnected -= OnDisconnected;
         _connection.NowPlayingReceived -= OnNowPlayingReceived;
-        _connection.PlaylistChanged -= OnPlaylistChanged;
 
     }
 
@@ -113,10 +123,13 @@ public partial class PlaylistPage : ContentPage
     }
     private void OnPlaylistChanged()
     {
-        // Only refresh if the playlist page is actually visible
         if (Shell.Current.CurrentPage is PlaylistPage)
         {
             _connection.RequestPlaylist();
+        }
+        else
+        {
+            _pendingPlaylistRefresh = true;
         }
     }
 
@@ -162,6 +175,16 @@ public partial class PlaylistPage : ContentPage
         // Build a new list and swap ItemsSource in one shot
         var viewList = source.ToList();
         PlaylistView.ItemsSource = viewList;
+
+        // After filtering, re-scroll to current if visible
+        if (!string.IsNullOrEmpty(_connection.now.Path))
+        {
+            Dispatcher.Dispatch(async () =>
+            {
+                await Task.Delay(50);
+                ScrollToCurrent(_connection.now.Path);
+            });
+        }
     }
     public void UpdateHighlight(string currentPath)
     {
