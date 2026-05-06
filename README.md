@@ -23,7 +23,12 @@ Built with .NET 10 MAUI, the Companion connects to the SkyeMusic server over TCP
 - Stop  
 - Next  
 - Previous
-- Low‑latency command sending via TCP  
+- Low‑latency command sending via TCP
+
+### 📄 Playlist Viewer
+- Search your playlist
+- See the current song highlighted
+- Tap to play
 
 ### 📜 Built‑In Log Viewer
 - View raw network messages  
@@ -77,7 +82,12 @@ Displays:
 - Artwork  
 - Playback state  
 - Transport controls  
-- Connection status icon  
+- Connection status icon
+
+### Playlist
+- Full browsing of your Skye Music playlist
+- Searching Supports
+- Highlighting of current song
 
 ### LogPage
 Displays:
@@ -97,11 +107,7 @@ Displays:
 
 ## 🚀 Roadmap
 
-- Client list UI on the server  
-- Heartbeat / ping system  
-- Playlist browsing  
-- Volume control  
-- Multi‑client awareness  
+- Audio Streaming
 - Visual polish and animations
 
 ## 📄 License
