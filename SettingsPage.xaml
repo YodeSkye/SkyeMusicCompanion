@@ -30,6 +30,20 @@
                    Unfocused="OnPortChanged" />
         </VerticalStackLayout>
 
+        <!-- Playlist Action Group -->
+        <VerticalStackLayout Spacing="0">
+            <Label Text="Default Playlist Tap Action"
+           FontAttributes="Bold" />
+
+            <Picker x:Name="TapActionPicker"
+            SelectedIndexChanged="OnTapActionChanged">
+                <Picker.Items>
+                    <x:String>Play Immediately</x:String>
+                    <x:String>Queue Item</x:String>
+                </Picker.Items>
+            </Picker>
+        </VerticalStackLayout>
+
         <!-- Keep Screen Awake Group -->
         <HorizontalStackLayout Padding="0,10">
             <Label Text="Keep Screen Awake"

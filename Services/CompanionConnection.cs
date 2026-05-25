@@ -187,6 +187,10 @@ namespace SkyeMusicCompanion.Services
         {
             SendCommand($"PLAYPATH|{path}");
         }
+        public void QueuePath(string path)
+        {
+            SendCommand($"QUEUEPATH|{path}");
+        }
         public void SendCommand(string cmd)
         {
             try

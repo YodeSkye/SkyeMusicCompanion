@@ -12,6 +12,7 @@ public partial class SettingsPage : ContentPage
         // Load saved values
         IpEntry.Text = Settings.HostServerIp;
         PortEntry.Text = Settings.HostServerPort.ToString();
+        TapActionPicker.SelectedIndex = Settings.PlaylistTapAction == TapAction.Play ? 0 : 1;
         KeepAwakeSwitch.IsToggled = Settings.KeepScreenAwake;
     }
     protected override async void OnDisappearing()
@@ -19,6 +20,7 @@ public partial class SettingsPage : ContentPage
         base.OnDisappearing();
         IpEntry.Unfocus();
         PortEntry.Unfocus();
+        TapActionPicker.Unfocus();
         await App.Connection.ReconnectAsync();
     }
 
@@ -30,6 +32,13 @@ public partial class SettingsPage : ContentPage
     {
         if (int.TryParse(PortEntry.Text, out int port))
             Settings.HostServerPort = port;
+    }
+    private void OnTapActionChanged(object sender, EventArgs e)
+    {
+        Settings.PlaylistTapAction =
+            TapActionPicker.SelectedIndex == 0 ? TapAction.Play : TapAction.Queue;
+
+        Log.Write("SETTINGS: PlaylistTapAction = " + Settings.PlaylistTapAction);
     }
     private void OnKeepAwakeToggled(object sender, ToggledEventArgs e)
     {

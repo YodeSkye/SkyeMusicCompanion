@@ -1,7 +1,7 @@
 
-using System.Text.Json;
 using SkyeMusicCompanion.Models;
 using SkyeMusicCompanion.Services;
+using System.Text.Json;
 
 namespace SkyeMusicCompanion;
 
@@ -133,10 +133,16 @@ public partial class PlaylistPage : ContentPage
         }
     }
 
-    private void OnItemTapped(object sender, TappedEventArgs e)
+    private async void OnItemTapped(object sender, TappedEventArgs e)
     {
-        if (e.Parameter is PlaylistItem item)
+        if (e.Parameter is not PlaylistItem item)
+            return;
+
+        if (Settings.PlaylistTapAction == TapAction.Play)
             _connection.PlayPath(item.Path);
+        else
+            _connection.QueuePath(item.Path);
+            await Toast.Show(ToastLayer, "Added to Queue");
     }
     private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
     {

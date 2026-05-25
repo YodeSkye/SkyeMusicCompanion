@@ -215,16 +215,6 @@ namespace SkyeMusicCompanion
 
             App.Connection.SetVolume(percent);
         }
-        //private void OnVolumeSliderChanged(object sender, ValueChangedEventArgs e)
-        //{
-        //    if (_suppressVolumeEvent)
-        //        return;
-
-        //    float v = (float)e.NewValue;
-        //    int percent = (int)(v * 100);
-
-        //    App.Connection.SetVolume(percent);
-        //}
         private void OnMuteClicked(object sender, EventArgs e)
         {
             App.Connection.SetMute(!_isMuted);
