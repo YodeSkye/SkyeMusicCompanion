@@ -7,14 +7,28 @@ public static class ScreenBehaviorManager
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
+            // Setting OFF → always allow sleep
             if (!Settings.KeepScreenAwake)
             {
-                ResetToSystem();
+                DeviceDisplay.KeepScreenOn = false;
+                Log.Write("SCREEN: KeepScreenOn = false (setting off)");
                 return;
             }
 
-            DeviceDisplay.KeepScreenOn = true;
-            Log.Write("SCREEN: KeepScreenOn = true");
+            // Normalize the playstate to uppercase
+            string state = App.Connection.now.PlayState?.ToUpperInvariant() ?? "";
+
+            // Only one special case: STOPPED
+            if (state == "STOPPED")
+            {
+                DeviceDisplay.KeepScreenOn = false;
+                Log.Write("SCREEN: KeepScreenOn = false (stopped)");
+            }
+            else
+            {
+                DeviceDisplay.KeepScreenOn = true;
+                Log.Write($"SCREEN: KeepScreenOn = true ({state})");
+            }
         });
     }
 
@@ -23,7 +37,7 @@ public static class ScreenBehaviorManager
         MainThread.BeginInvokeOnMainThread(() =>
         {
             DeviceDisplay.KeepScreenOn = false;
-            Log.Write("SCREEN: KeepScreenOn = false");
+            Log.Write("SCREEN: KeepScreenOn = false (reset)");
         });
     }
 }

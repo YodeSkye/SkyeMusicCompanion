@@ -52,7 +52,7 @@
                 Toggled="OnKeepAwakeToggled"
                 HorizontalOptions="End" />
         </HorizontalStackLayout>
-        <Label Text="Keeps the screen from turning off while connected. 
+        <Label Text="Keeps the screen from turning off while connected and playing. 
 When plugged in: stays fully bright. 
 When on battery: stays on but dims normally."
             FontSize="12"

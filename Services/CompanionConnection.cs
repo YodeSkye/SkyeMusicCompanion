@@ -110,6 +110,7 @@ namespace SkyeMusicCompanion.Services
                         case "NOWPLAYING":
                             now = NowPlayingParser.Parse(line);
                             NowPlayingReceived?.Invoke();
+                            ScreenBehaviorManager.ApplyBehavior();
                             break;
                         case "STREAMINFO":
                             StreamInfoReceived?.Invoke(line);
