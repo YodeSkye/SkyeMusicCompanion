@@ -7,13 +7,23 @@ namespace SkyeMusicCompanion
     public partial class MainPage : ContentPage
     {
 
+        private IDispatcherTimer? _positionTimer;
+        private DateTime _lastNowPlayingTimestamp;
+        private int _lastServerPosition; 
         private bool _isMuted;
         private bool _suppressVolumeEvent; // prevents feedback loop
         private int _lastSentVolume = -1;
 
+
         public MainPage()
         {
             InitializeComponent();
+
+            _positionTimer = Dispatcher.CreateTimer();
+            _positionTimer.Interval = TimeSpan.FromSeconds(1);
+            _positionTimer.Tick += OnPositionTimerTick;
+            _positionTimer.Start();
+
         }
         protected override void OnAppearing()
         {
@@ -28,6 +38,7 @@ namespace SkyeMusicCompanion
             App.Connection.MuteReceived += OnMuteReceived;
             
             App.Connection.RequestNowPlaying();
+            App.Connection.NowPlayingReceived += OnNowPlayingReceived;
             App.Connection.RequestVolume();
             App.Connection.RequestMute();
           
@@ -36,6 +47,7 @@ namespace SkyeMusicCompanion
         {
             base.OnDisappearing();
 
+            App.Connection.NowPlayingReceived -= OnNowPlayingReceived;
             App.Connection.VolumeReceived -= OnVolumeReceived;
             App.Connection.MuteReceived -= OnMuteReceived;
         }
@@ -89,6 +101,13 @@ namespace SkyeMusicCompanion
                 DurationLabel.IsVisible = true;
                 DurationTextLabel.IsVisible = true;
             }
+            // --- POSITION SLIDER UPDATE ---
+            PositionSlider.Maximum = now.Duration;
+            PositionSlider.Value = now.Position;
+            _lastServerPosition = now.Position;
+            _lastNowPlayingTimestamp = DateTime.Now;
+            bool canSeek = now.Duration > 0;
+            PositionSlider.IsEnabled = canSeek;
 
             // Artwork
             if (!string.IsNullOrWhiteSpace(now.ArtworkBase64))
@@ -173,6 +192,13 @@ namespace SkyeMusicCompanion
 
             });
         }
+        private void OnNowPlayingReceived()
+        {
+            Dispatcher.Dispatch(() =>
+            {
+                UpdateNowPlaying(App.Connection.now);
+            });
+        }
         private void OnVolumeReceived(string line)
         {
             var parts = line.Split('|');
@@ -219,6 +245,17 @@ namespace SkyeMusicCompanion
         {
             App.Connection.SetMute(!_isMuted);
         }
+        private void OnPositionSliderDragCompleted(object sender, EventArgs e)
+        {
+            int newPos = (int)PositionSlider.Value;
+
+            // Send seek command to server
+            App.Connection.SendCommand($"SEEK|{newPos}");
+
+            // Update local prediction baseline
+            _lastServerPosition = newPos;
+            _lastNowPlayingTimestamp = DateTime.Now;
+        }
         private async void OnToggleClicked(object sender, EventArgs e)
         {
             App.Connection.SendCommand("toggle");
@@ -234,6 +271,28 @@ namespace SkyeMusicCompanion
         private async void OnPreviousClicked(object sender, EventArgs e)
         {
             App.Connection.SendCommand("previous");
+        }
+
+        private void OnPositionTimerTick(object? sender, EventArgs e)
+        {
+            var np = App.Connection.now;
+
+            // Only animate if playing
+            if (!np.PlayState.Equals("playing", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            // How long since the last NOWPLAYING snapshot?
+            var elapsed = (int)(DateTime.Now - _lastNowPlayingTimestamp).TotalSeconds;
+
+            int predicted = _lastServerPosition + elapsed;
+
+            // Clamp
+            if (predicted > np.Duration)
+                predicted = np.Duration;
+
+            // Update UI
+            PositionSlider.Value = predicted;
+            PositionLabel.Text = FormatTime(predicted);
         }
     }
 }

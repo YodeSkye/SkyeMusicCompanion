@@ -30,9 +30,13 @@
                     <!-- Rows -->
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
+                        <!-- Position bar -->
                         <RowDefinition Height="Auto" />
+                        <!-- Play / Stop -->
                         <RowDefinition Height="Auto" />
-                        <!-- NEW VOLUME ROW -->
+                        <!-- Prev / Next -->
+                        <RowDefinition Height="Auto" />
+                        <!-- Volume -->
                     </Grid.RowDefinitions>
 
                     <!-- Columns -->
@@ -41,8 +45,19 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- TOP ROW: Play / Stop -->
-                    <Button Grid.Row="0" Grid.Column="0"
+                    <!-- POSITION SLIDER -->
+                    <Slider Grid.Row="0" Grid.ColumnSpan="2"
+                        x:Name="PositionSlider"
+                        Minimum="0"
+                        Maximum="1"
+                        Value="0"
+                        ThumbColor="#8b1a10"
+                        MinimumTrackColor="#8b1a10"
+                        DragCompleted="OnPositionSliderDragCompleted"
+                        Margin="0,0,0,10"/>
+                   
+                    <!-- Play / Stop -->
+                    <Button Grid.Row="1" Grid.Column="0"
                             x:Name="ToggleLabel"
                             Text="Play"
                             BackgroundColor="#8b1a10"
@@ -51,7 +66,7 @@
                             HeightRequest="64"
                             Clicked="OnToggleClicked" />
 
-                    <Button Grid.Row="0" Grid.Column="1"
+                    <Button Grid.Row="1" Grid.Column="1"
                             Text="Stop"
                             BackgroundColor="#8b1a10"
                             ImageSource="stop32.png"
@@ -59,8 +74,8 @@
                             HeightRequest="64"
                             Clicked="OnStopClicked" />
 
-                    <!-- SECOND ROW: Prev / Next -->
-                    <Grid Grid.Row="1" Grid.ColumnSpan="2"
+                    <!-- Prev / Next -->
+                    <Grid Grid.Row="2" Grid.ColumnSpan="2"
                           ColumnSpacing="15"
                           HorizontalOptions="Center">
 
@@ -86,8 +101,8 @@
                                 Clicked="OnNextClicked" />
                     </Grid>
 
-                    <!-- THIRD ROW: Mute + Volume Slider -->
-                    <Grid Grid.Row="2" Grid.ColumnSpan="2"
+                    <!-- Mute + Volume Slider -->
+                    <Grid Grid.Row="3" Grid.ColumnSpan="2"
                           ColumnDefinitions="Auto,*"
                           Margin="0,0,0,0">
 
