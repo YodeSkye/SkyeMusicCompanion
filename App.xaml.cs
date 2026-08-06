@@ -40,6 +40,13 @@ namespace SkyeMusicCompanion
             Connection.NowPlayingReceived += OnNowPlayingReceived;
             Connection.UnknownMessageReceived += OnUnknownMessageReceived;
 
+            // Default to showing Reconnect until a successful connection is made
+            OnUI(() =>
+            {
+                if (Application.Current?.Windows[0]?.Page is AppShell shell)
+                    shell.SetReconnectVisible(true);
+            });
+            
             // Start connection AFTER window exists
             _ = Connection.ConnectAsync(Settings.HostServerIp, Settings.HostServerPort);
 

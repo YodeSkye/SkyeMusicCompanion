@@ -33,7 +33,16 @@ namespace SkyeMusicCompanion
             App.Connection.Disconnected += OnDisconnected;
             bool isConnected = App.Connection.IsConnected;
             SetConnectionState(isConnected);
-   
+
+            if (isConnected)
+            {
+                OnConnected();
+            }
+            else
+            {
+                OnDisconnected();
+            }
+
             App.Connection.VolumeReceived += OnVolumeReceived;
             App.Connection.MuteReceived += OnMuteReceived;
             
@@ -167,26 +176,26 @@ namespace SkyeMusicCompanion
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
+                PositionSlider.IsEnabled = true;
                 VolumeSlider.IsEnabled = true;
                 MuteButton.IsEnabled = true;
-
-                // Ask server for real state
-                //App.Connection.RequestVolume();
-                //App.Connection.RequestMute();
             });
         }
         private void OnDisconnected()
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                // Reset volume slider
+
+                // Reset sliders
+                PositionSlider.Value = 0;
                 VolumeSlider.Value = 0;
 
                 // Reset mute state
                 _isMuted = false;
                 MuteButton.ImageSource = "volume.png";
 
-                // Disable controls (optional but recommended)
+                // Disable controls
+                PositionSlider.IsEnabled = false;
                 VolumeSlider.IsEnabled = false;
                 MuteButton.IsEnabled = false;
 
@@ -276,6 +285,9 @@ namespace SkyeMusicCompanion
         private void OnPositionTimerTick(object? sender, EventArgs e)
         {
             var np = App.Connection.now;
+
+            if (App.Connection.IsConnected == false || np == null)
+                return;
 
             // Only animate if playing
             if (!np.PlayState.Equals("playing", StringComparison.OrdinalIgnoreCase))
