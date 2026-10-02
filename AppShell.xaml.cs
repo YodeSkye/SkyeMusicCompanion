@@ -7,6 +7,9 @@ namespace SkyeMusicCompanion
         {
             InitializeComponent();
             Navigating += OnShellNavigating;
+
+            // Set version and build number from MAUI AppInfo
+            VersionLabel.Text = $"v{AppInfo.Current.VersionString} (Build {AppInfo.Current.BuildString})";
         }
 
         private async void OnShellNavigating(object? sender, ShellNavigatingEventArgs e)
@@ -23,6 +26,7 @@ namespace SkyeMusicCompanion
                 await App.Connection.ReconnectAsync();
             }
         }
+
         private async void OnReconnectMenuClicked(object sender, EventArgs e)
         {
             await App.Connection.ReconnectAsync();
@@ -32,6 +36,5 @@ namespace SkyeMusicCompanion
         {
             ReconnectItem.IsVisible = visible;
         }
-
     }
 }
