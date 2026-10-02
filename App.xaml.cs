@@ -41,11 +41,11 @@ namespace SkyeMusicCompanion
             Connection.UnknownMessageReceived += OnUnknownMessageReceived;
 
             // Default to showing Reconnect until a successful connection is made
-            OnUI(() =>
-            {
-                if (Application.Current?.Windows[0]?.Page is AppShell shell)
-                    shell.SetReconnectVisible(true);
-            });
+            //OnUI(() =>
+            //{
+            //    if (Application.Current?.Windows[0]?.Page is AppShell shell)
+            //        shell.SetReconnectVisible(true);
+            //});
             
             // Start connection AFTER window exists
             _ = Connection.ConnectAsync(Settings.HostServerIp, Settings.HostServerPort);
@@ -91,11 +91,11 @@ namespace SkyeMusicCompanion
                 mp.SetConnectionState(true);
             });
 
-            OnUI(() =>
-            {
-                if (Application.Current?.Windows[0]?.Page is AppShell shell)
-                    shell.SetReconnectVisible(false);
-            });
+            //OnUI(() =>
+            //{
+            //    if (Application.Current?.Windows[0]?.Page is AppShell shell)
+            //        shell.SetReconnectVisible(false);
+            //});
         }
         private void OnDisconnected()
         {
@@ -108,11 +108,11 @@ namespace SkyeMusicCompanion
                 mp.ClearNowPlaying();
             });
 
-            OnUI(() =>
-            {
-                if (Application.Current?.Windows[0]?.Page is AppShell shell)
-                    shell.SetReconnectVisible(true);
-            });
+            //OnUI(() =>
+            //{
+            //    if (Application.Current?.Windows[0]?.Page is AppShell shell)
+            //        shell.SetReconnectVisible(true);
+            //});
         }
         private void OnServerClosing()
         {
@@ -127,11 +127,11 @@ namespace SkyeMusicCompanion
 
             Connection.Disconnect();
 
-            OnUI(() =>
-            {
-                if (Application.Current?.Windows[0]?.Page is AppShell shell)
-                    shell.SetReconnectVisible(true);
-            });
+            //OnUI(() =>
+            //{
+            //    if (Application.Current?.Windows[0]?.Page is AppShell shell)
+            //        shell.SetReconnectVisible(true);
+            //});
 
             Log.Write("SERVER CLOSING — Companion disconnected gracefully.");
         }

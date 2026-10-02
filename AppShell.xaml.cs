@@ -32,9 +32,9 @@ namespace SkyeMusicCompanion
             await App.Connection.ReconnectAsync();
         }
 
-        public void SetReconnectVisible(bool visible)
-        {
-            ReconnectItem.IsVisible = visible;
-        }
+        //public void SetReconnectVisible(bool visible)
+        //{
+        //    ReconnectItem.IsVisible = visible;
+        //}
     }
 }
