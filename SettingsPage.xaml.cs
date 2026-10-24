@@ -1,4 +1,3 @@
-
 using SkyeMusicCompanion.Services;
 
 namespace SkyeMusicCompanion;
@@ -12,6 +11,7 @@ public partial class SettingsPage : ContentPage
         // Load saved values
         IpEntry.Text = Settings.HostServerIp;
         PortEntry.Text = Settings.HostServerPort.ToString();
+        StreamPortEntry.Text = Settings.StreamServerPort.ToString();
         TapActionPicker.SelectedIndex = Settings.PlaylistTapAction == TapAction.Play ? 0 : 1;
         KeepAwakeSwitch.IsToggled = Settings.KeepScreenAwake;
     }
@@ -20,6 +20,7 @@ public partial class SettingsPage : ContentPage
         base.OnDisappearing();
         IpEntry.Unfocus();
         PortEntry.Unfocus();
+        StreamPortEntry.Unfocus();
         TapActionPicker.Unfocus();
         await App.Connection.ReconnectAsync();
     }
@@ -32,6 +33,11 @@ public partial class SettingsPage : ContentPage
     {
         if (int.TryParse(PortEntry.Text, out int port))
             Settings.HostServerPort = port;
+    }
+    private void OnStreamPortChanged(object sender, EventArgs e)
+    {
+        if (int.TryParse(StreamPortEntry.Text, out int streamPort))
+            Settings.StreamServerPort = streamPort;
     }
     private void OnTapActionChanged(object sender, EventArgs e)
     {

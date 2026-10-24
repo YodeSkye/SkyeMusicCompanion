@@ -25,9 +25,19 @@
             <Label Text="Host Server Port"
                    FontAttributes="Bold" />
             <Entry x:Name="PortEntry"
-                   Placeholder="5000"
+                   Placeholder="5050"
                    Keyboard="Numeric"
                    Unfocused="OnPortChanged" />
+        </VerticalStackLayout>
+
+        <!-- Stream Port Group -->
+        <VerticalStackLayout Spacing="0">
+            <Label Text="Live Stream Port"
+                   FontAttributes="Bold" />
+            <Entry x:Name="StreamPortEntry"
+                   Placeholder="5051"
+                   Keyboard="Numeric"
+                   Unfocused="OnStreamPortChanged" />
         </VerticalStackLayout>
 
         <!-- Playlist Action Group -->

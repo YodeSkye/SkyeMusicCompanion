@@ -13,6 +13,11 @@ public static class Settings
         get => Preferences.Get(nameof(HostServerPort), 5050);
         set => Preferences.Set(nameof(HostServerPort), value);
     }
+    public static int StreamServerPort
+    {
+        get => Preferences.Get(nameof(StreamServerPort), 5051);
+        set => Preferences.Set(nameof(StreamServerPort), value);
+    }
     public static TapAction PlaylistTapAction
     {
         get => (TapAction)Preferences.Get(nameof(PlaylistTapAction), (int)TapAction.Play);
