@@ -1,214 +1,233 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="SkyeMusicCompanion.MainPage">
 
-    <ScrollView>
+    <Grid>
+    
+        <!-- Hidden MediaElement for live audio streaming -->
+        <toolkit:MediaElement x:Name="AudioStreamPlayer"
+                              ShouldAutoPlay="False"
+                              IsVisible="False" />
+    
+        <ScrollView>
 
-        <VerticalStackLayout Padding="10">
+            <VerticalStackLayout Padding="10">
 
-            <!-- NOW PLAYING SECTION -->
-            <VerticalStackLayout Spacing="5">
+                <!-- NOW PLAYING SECTION -->
+                <VerticalStackLayout Spacing="5">
 
-                <!-- PlayState + Connection -->
-                <Grid ColumnDefinitions="*,Auto" Padding="0,0,0,6">
-                    <HorizontalStackLayout Grid.Column="0" Spacing="6">
-                        <Label x:Name="PlayStateLabel"
-                               FontSize="22"/>
-                    </HorizontalStackLayout>
+                    <!-- PlayState + Connection -->
+                    <Grid ColumnDefinitions="*,Auto" Padding="0,0,0,6">
+                        <HorizontalStackLayout Grid.Column="0" Spacing="6">
+                            <Label x:Name="PlayStateLabel"
+                                   FontSize="22"/>
+                        </HorizontalStackLayout>
 
-                    <Image x:Name="ConnectionStatusIcon"
-                           WidthRequest="16"
-                           HeightRequest="16"
-                           HorizontalOptions="End"
-                           VerticalOptions="Center" />
-                </Grid>
+                        <Image x:Name="ConnectionStatusIcon"
+                               WidthRequest="16"
+                               HeightRequest="16"
+                               HorizontalOptions="End"
+                               VerticalOptions="Center" />
+                    </Grid>
 
-                <!-- CONTROL GRID -->
-                <Grid RowSpacing="15" ColumnSpacing="15">
+                    <!-- CONTROL GRID -->
+                    <Grid RowSpacing="15" ColumnSpacing="15">
 
-                    <!-- Rows -->
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <!-- Position bar -->
-                        <RowDefinition Height="Auto" />
-                        <!-- Play / Stop -->
-                        <RowDefinition Height="Auto" />
-                        <!-- Prev / Next -->
-                        <RowDefinition Height="Auto" />
-                        <!-- Volume -->
-                    </Grid.RowDefinitions>
+                        <!-- Rows -->
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <!-- Position bar -->
+                            <RowDefinition Height="Auto" />
+                            <!-- Play / Stop -->
+                            <RowDefinition Height="Auto" />
+                            <!-- Prev / Next -->
+                            <RowDefinition Height="Auto" />
+                            <!-- Volume -->
+                        </Grid.RowDefinitions>
 
-                    <!-- Columns -->
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-
-                    <!-- POSITION SLIDER -->
-                    <Slider Grid.Row="0" Grid.ColumnSpan="2"
-                        x:Name="PositionSlider"
-                        Minimum="0"
-                        Maximum="1"
-                        Value="0"
-                        ThumbColor="#8b1a10"
-                        MinimumTrackColor="#8b1a10"
-                        DragCompleted="OnPositionSliderDragCompleted"
-                        Margin="0,0,0,10"/>
-                   
-                    <!-- Play / Stop -->
-                    <Button Grid.Row="1" Grid.Column="0"
-                            x:Name="ToggleLabel"
-                            Text="Play"
-                            BackgroundColor="#8b1a10"
-                            ImageSource="play32.png"
-                            ContentLayout="Left,10"
-                            HeightRequest="64"
-                            Clicked="OnToggleClicked" />
-
-                    <Button Grid.Row="1" Grid.Column="1"
-                            Text="Stop"
-                            BackgroundColor="#8b1a10"
-                            ImageSource="stop32.png"
-                            ContentLayout="Left,10"
-                            HeightRequest="64"
-                            Clicked="OnStopClicked" />
-
-                    <!-- Prev / Next -->
-                    <Grid Grid.Row="2" Grid.ColumnSpan="2"
-                          ColumnSpacing="15"
-                          HorizontalOptions="Center">
-
+                        <!-- Columns -->
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <Button Grid.Column="0"
-                                Text="Prev"
+                        <!-- POSITION SLIDER -->
+                        <Slider Grid.Row="0" Grid.ColumnSpan="2"
+                            x:Name="PositionSlider"
+                            Minimum="0"
+                            Maximum="1"
+                            Value="0"
+                            ThumbColor="#8b1a10"
+                            MinimumTrackColor="#8b1a10"
+                            DragCompleted="OnPositionSliderDragCompleted"
+                            Margin="0,0,0,10"/>
+                   
+                        <!-- Play / Stop -->
+                        <Button Grid.Row="1" Grid.Column="0"
+                                x:Name="ToggleLabel"
+                                Text="Play"
                                 BackgroundColor="#8b1a10"
-                                ImageSource="previous32.png"
+                                ImageSource="play32.png"
                                 ContentLayout="Left,10"
                                 HeightRequest="64"
-                                Clicked="OnPreviousClicked" />
+                                Clicked="OnToggleClicked" />
 
-                        <Button Grid.Column="1"
-                                Text="Next"
-                                BackgroundColor="#8b1a10"                                
-                                ImageSource="next32.png"
+                        <Button Grid.Row="1" Grid.Column="1"
+                                Text="Stop"
+                                BackgroundColor="#8b1a10"
+                                ImageSource="stop32.png"
                                 ContentLayout="Left,10"
                                 HeightRequest="64"
-                                Clicked="OnNextClicked" />
+                                Clicked="OnStopClicked" />
+
+                        <!-- Prev / Next -->
+                        <Grid Grid.Row="2" Grid.ColumnSpan="2"
+                              ColumnSpacing="15"
+                              HorizontalOptions="Center">
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0"
+                                    Text="Prev"
+                                    BackgroundColor="#8b1a10"
+                                    ImageSource="previous32.png"
+                                    ContentLayout="Left,10"
+                                    HeightRequest="64"
+                                    Clicked="OnPreviousClicked" />
+
+                            <Button Grid.Column="1"
+                                    Text="Next"
+                                    BackgroundColor="#8b1a10"                                
+                                    ImageSource="next32.png"
+                                    ContentLayout="Left,10"
+                                    HeightRequest="64"
+                                    Clicked="OnNextClicked" />
+                        </Grid>
+
+                        <!-- Mute + Volume Slider -->
+                        <Grid Grid.Row="3" Grid.ColumnSpan="2"
+                              ColumnDefinitions="Auto,*"
+                              Margin="0,0,0,0">
+
+                            <!-- Mute Button -->
+                            <Button x:Name="MuteButton"
+                                    Grid.Column="0"
+                                    BackgroundColor="#8b1a10"
+                                    WidthRequest="64"
+                                    HeightRequest="64"
+                                    Clicked="OnMuteClicked" />
+
+                            <!-- Volume Slider with true 25/50/75% marks -->
+                            <AbsoluteLayout Grid.Column="1"
+                                HeightRequest="40"
+                                Margin="10,0,0,0"
+                                VerticalOptions="Center">
+
+                                <!-- 25% -->
+                                <BoxView Color="#8b1a10"
+                                     WidthRequest="2"
+                                     HeightRequest="10"
+                                     AbsoluteLayout.LayoutBounds="0.25,0.5,2,10"
+                                     AbsoluteLayout.LayoutFlags="PositionProportional" />
+
+                                <!-- 50% -->
+                                <BoxView Color="#8b1a10"
+                                     WidthRequest="3"
+                                     HeightRequest="14"
+                                     AbsoluteLayout.LayoutBounds="0.50,0.5,2,14"
+                                     AbsoluteLayout.LayoutFlags="PositionProportional" />
+
+                                <!-- 75% -->
+                                <BoxView Color="#8b1a10"
+                                     WidthRequest="2"
+                                     HeightRequest="10"
+                                     AbsoluteLayout.LayoutBounds="0.75,0.5,2,10"
+                                     AbsoluteLayout.LayoutFlags="PositionProportional" />
+
+                                <!-- Slider on top -->
+                                <Slider x:Name="VolumeSlider"
+                                    Minimum="0"
+                                    Maximum="1"
+                                    ThumbColor="#8b1a10"
+                                    MinimumTrackColor="#8b1a10"
+                                    VerticalOptions="Center"
+                                    ValueChanged="OnVolumeSliderChanged"
+                                    AbsoluteLayout.LayoutBounds="0,0,1,1"
+                                    AbsoluteLayout.LayoutFlags="All" />
+
+                            </AbsoluteLayout>
+
+                            <!-- Stream Toggle Button (Right) -->
+                            <Button x:Name="StreamToggleButton"
+                                    Grid.Column="2"
+                                    BackgroundColor="#8b1a10"
+                                    WidthRequest="64"
+                                    HeightRequest="64"
+                                    ImageSource="streamoff.svg"
+                                    Clicked="OnStreamToggleClicked" />
+                        
+                        </Grid>
+
                     </Grid>
 
-                    <!-- Mute + Volume Slider -->
-                    <Grid Grid.Row="3" Grid.ColumnSpan="2"
-                          ColumnDefinitions="Auto,*"
-                          Margin="0,0,0,0">
+                    <!-- NOW PLAYING TEXT -->
+                    <Label x:Name="CurrentTitleLabel"
+                           Margin="0,10,0,0"
+                           HorizontalTextAlignment="Center"
+                           FontSize="22"/>
 
-                        <!-- Mute Button -->
-                        <Button x:Name="MuteButton"
-                                Grid.Column="0"
-                                BackgroundColor="#8b1a10"
-                                WidthRequest="64"
-                                HeightRequest="64"
-                                Clicked="OnMuteClicked" />
+                    <Label x:Name="TitleLabel"
+                           Margin="0,5,0,0"
+                           HorizontalTextAlignment="Center"
+                           FontSize="18"/>
 
-                        <!-- Volume Slider with true 25/50/75% marks -->
-                        <AbsoluteLayout Grid.Column="1"
-                            HeightRequest="40"
-                            Margin="10,0,0,0"
-                            VerticalOptions="Center">
+                    <!-- ARTWORK -->
+                    <Image x:Name="ArtworkImage"
+                           HeightRequest="350"
+                           WidthRequest="350"
+                           Aspect="AspectFit"
+                           HorizontalOptions="Center" />
 
-                            <!-- 25% -->
-                            <BoxView Color="#8b1a10"
-                                 WidthRequest="2"
-                                 HeightRequest="10"
-                                 AbsoluteLayout.LayoutBounds="0.25,0.5,2,10"
-                                 AbsoluteLayout.LayoutFlags="PositionProportional" />
+                    <!-- POSITION + DURATION -->
+                    <Grid ColumnDefinitions="*,*"
+                          Padding="0"
+                          Margin="0">
 
-                            <!-- 50% -->
-                            <BoxView Color="#8b1a10"
-                                 WidthRequest="3"
-                                 HeightRequest="14"
-                                 AbsoluteLayout.LayoutBounds="0.50,0.5,2,14"
-                                 AbsoluteLayout.LayoutFlags="PositionProportional" />
+                        <!-- Position -->
+                        <HorizontalStackLayout Grid.Column="0"
+                                               Spacing="6"
+                                               IsVisible="False">
+                            <Label Text="Position:"
+                                   FontSize="18"/>
+                            <Label x:Name="PositionLabel"
+                                   FontSize="18"/>
+                        </HorizontalStackLayout>
 
-                            <!-- 75% -->
-                            <BoxView Color="#8b1a10"
-                                 WidthRequest="2"
-                                 HeightRequest="10"
-                                 AbsoluteLayout.LayoutBounds="0.75,0.5,2,10"
-                                 AbsoluteLayout.LayoutFlags="PositionProportional" />
-
-                            <!-- Slider on top -->
-                            <Slider x:Name="VolumeSlider"
-                                Minimum="0"
-                                Maximum="1"
-                                ThumbColor="#8b1a10"
-                                MinimumTrackColor="#8b1a10"
-                                VerticalOptions="Center"
-                                ValueChanged="OnVolumeSliderChanged"
-                                AbsoluteLayout.LayoutBounds="0,0,1,1"
-                                AbsoluteLayout.LayoutFlags="All" />
-
-                        </AbsoluteLayout>
+                        <!-- Duration -->
+                        <HorizontalStackLayout Grid.Column="1"
+                                               Spacing="6"
+                                               HorizontalOptions="End"
+                                               IsVisible="False">
+                            <Label x:Name="DurationTextLabel"
+                                   Text="Duration:"
+                                   FontSize="18"/>
+                            <Label x:Name="DurationLabel"
+                                   FontSize="18"/>
+                        </HorizontalStackLayout>
 
                     </Grid>
 
-                </Grid>
-
-                <!-- NOW PLAYING TEXT -->
-                <Label x:Name="CurrentTitleLabel"
-                       Margin="0,10,0,0"
-                       HorizontalTextAlignment="Center"
-                       FontSize="22"/>
-
-                <Label x:Name="TitleLabel"
-                       Margin="0,5,0,0"
-                       HorizontalTextAlignment="Center"
-                       FontSize="18"/>
-
-                <!-- ARTWORK -->
-                <Image x:Name="ArtworkImage"
-                       HeightRequest="350"
-                       WidthRequest="350"
-                       Aspect="AspectFit"
-                       HorizontalOptions="Center" />
-
-                <!-- POSITION + DURATION -->
-                <Grid ColumnDefinitions="*,*"
-                      Padding="0"
-                      Margin="0">
-
-                    <!-- Position -->
-                    <HorizontalStackLayout Grid.Column="0"
-                                           Spacing="6"
-                                           IsVisible="False">
-                        <Label Text="Position:"
-                               FontSize="18"/>
-                        <Label x:Name="PositionLabel"
-                               FontSize="18"/>
-                    </HorizontalStackLayout>
-
-                    <!-- Duration -->
-                    <HorizontalStackLayout Grid.Column="1"
-                                           Spacing="6"
-                                           HorizontalOptions="End"
-                                           IsVisible="False">
-                        <Label x:Name="DurationTextLabel"
-                               Text="Duration:"
-                               FontSize="18"/>
-                        <Label x:Name="DurationLabel"
-                               FontSize="18"/>
-                    </HorizontalStackLayout>
-
-                </Grid>
+                </VerticalStackLayout>
 
             </VerticalStackLayout>
 
-        </VerticalStackLayout>
+        </ScrollView>
 
-    </ScrollView>
-
+    </Grid>
+    
 </ContentPage>

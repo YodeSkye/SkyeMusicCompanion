@@ -1,5 +1,4 @@
-﻿
-using SkyeMusicCompanion.Models;
+﻿using SkyeMusicCompanion.Models;
 using SkyeMusicCompanion.Services;
 
 namespace SkyeMusicCompanion
@@ -7,7 +6,7 @@ namespace SkyeMusicCompanion
     public partial class MainPage : ContentPage
     {
 
-        private IDispatcherTimer? _positionTimer;
+        private readonly IDispatcherTimer? _positionTimer;
         private DateTime _lastNowPlayingTimestamp;
         private int _lastServerPosition; 
         private bool _isMuted;
