@@ -328,23 +328,35 @@ namespace SkyeMusicCompanion
             var ts = TimeSpan.FromSeconds(seconds);
             return $"{(int)ts.TotalMinutes}:{ts.Seconds:D2}";
         }
+
+
         private void StartAudioStream()
         {
-            string streamUrl = $"http://{Settings.HostServerIp}:{Settings.StreamServerPort}/live";
+            string serverUrl = $"http://{Settings.HostServerIp}:{Settings.StreamServerPort}/live";
+            string userAgent = $"Skye Music Companion/{AppInfo.Current.VersionString}";
 
-            // Custom headers to cleanly identify your client app and version on the server
-            var headers = new Dictionary<string, string>
+            if (DeviceInfo.Platform == DevicePlatform.WinUI)
             {
-                { "User-Agent", $"Skye Music Companion/{AppInfo.Current.VersionString}" }
-            };
+                // Windows: Stream via direct URI without headers (avoids WMF header limitations)
+                AudioStreamPlayer.Source = MediaSource.FromUri(new Uri(serverUrl));
+            }
+            else
+            {
+                // Android: Direct URI assignment with your existing headers dictionary
+                var headers = new Dictionary<string, string>
+        {
+            { "User-Agent", userAgent }
+        };
 
-            // Assign the source with custom headers
-            AudioStreamPlayer.Source = MediaSource.FromUri(new Uri(streamUrl), headers);
+                AudioStreamPlayer.Source = MediaSource.FromUri(new Uri(serverUrl), headers);
+            }
+
             AudioStreamPlayer.Play();
 
             _isStreaming = true;
             StreamToggleButton.ImageSource = "streamactive.svg";
         }
+
         private void StopAudioStream()
         {
             AudioStreamPlayer.Stop();
