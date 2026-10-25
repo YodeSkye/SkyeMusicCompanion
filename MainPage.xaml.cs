@@ -1,18 +1,19 @@
-﻿using SkyeMusicCompanion.Models;
+﻿using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Maui.Views;
+using SkyeMusicCompanion.Models;
 using SkyeMusicCompanion.Services;
 
 namespace SkyeMusicCompanion
 {
     public partial class MainPage : ContentPage
     {
-
         private readonly IDispatcherTimer? _positionTimer;
         private DateTime _lastNowPlayingTimestamp;
-        private int _lastServerPosition; 
+        private int _lastServerPosition;
         private bool _isMuted;
         private bool _suppressVolumeEvent; // prevents feedback loop
         private int _lastSentVolume = -1;
-
+        private bool _isStreaming = false; // Tracks audio stream state
 
         public MainPage()
         {
@@ -22,7 +23,6 @@ namespace SkyeMusicCompanion
             _positionTimer.Interval = TimeSpan.FromSeconds(1);
             _positionTimer.Tick += OnPositionTimerTick;
             _positionTimer.Start();
-
         }
         protected override void OnAppearing()
         {
@@ -44,13 +44,12 @@ namespace SkyeMusicCompanion
 
             App.Connection.VolumeReceived += OnVolumeReceived;
             App.Connection.MuteReceived += OnMuteReceived;
-            
+
             App.Connection.RequestNowPlaying();
             App.Connection.NowPlayingReceived += OnNowPlayingReceived;
             App.Connection.RequestVolume();
             App.Connection.RequestMute();
-          
-      }
+        }
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
@@ -58,6 +57,165 @@ namespace SkyeMusicCompanion
             App.Connection.NowPlayingReceived -= OnNowPlayingReceived;
             App.Connection.VolumeReceived -= OnVolumeReceived;
             App.Connection.MuteReceived -= OnMuteReceived;
+        }
+        private void OnConnected()
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                PositionSlider.IsEnabled = true;
+                VolumeSlider.IsEnabled = true;
+                MuteButton.IsEnabled = true;
+                StreamToggleButton.IsEnabled = true; // Enable stream button on connection
+            });
+        }
+        private void OnDisconnected()
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                // Ensure stream is stopped if connection drops
+                if (_isStreaming)
+                {
+                    StopAudioStream();
+                }
+
+                // Reset sliders
+                PositionSlider.Value = 0;
+                VolumeSlider.Value = 0;
+
+                // Reset mute state
+                _isMuted = false;
+                MuteButton.ImageSource = "volume.png";
+
+                // Disable controls
+                PositionSlider.IsEnabled = false;
+                VolumeSlider.IsEnabled = false;
+                MuteButton.IsEnabled = false;
+                StreamToggleButton.IsEnabled = false; // Disable stream button on disconnect
+            });
+        }
+        private void OnNowPlayingReceived()
+        {
+            Dispatcher.Dispatch(() =>
+            {
+                UpdateNowPlaying(App.Connection.now);
+            });
+        }
+        private void OnVolumeReceived(string line)
+        {
+            var parts = line.Split('|');
+            if (parts.Length == 2 && int.TryParse(parts[1], out int percent))
+            {
+                float vol = percent / 100f;
+
+                Dispatcher.Dispatch(() =>
+                {
+                    _suppressVolumeEvent = true;
+                    VolumeSlider.Value = vol;
+                    _suppressVolumeEvent = false;
+                });
+            }
+        }
+        private void OnMuteReceived(string line)
+        {
+            var parts = line.Split('|');
+            if (parts.Length == 2 && bool.TryParse(parts[1], out bool muted))
+            {
+                Dispatcher.Dispatch(() =>
+                {
+                    _isMuted = muted;
+                    MuteButton.ImageSource = muted ? "volumemute.png" : "volume.png";
+                });
+            }
+        }
+        private void OnMediaStateChanged(object sender, MediaStateChangedEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine($"---> MediaState Changed: {e.NewState}");
+        }
+        private void OnMediaFailed(object sender, MediaFailedEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine($"---> Media Failed: {e.ErrorMessage}");
+        }
+        private void OnPositionTimerTick(object? sender, EventArgs e)
+        {
+            var np = App.Connection.now;
+
+            if (App.Connection.IsConnected == false || np == null)
+                return;
+
+            // Only animate if playing
+            if (!np.PlayState.Equals("playing", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            // How long since the last NOWPLAYING snapshot?
+            var elapsed = (int)(DateTime.Now - _lastNowPlayingTimestamp).TotalSeconds;
+
+            int predicted = _lastServerPosition + elapsed;
+
+            // Clamp
+            if (predicted > np.Duration)
+                predicted = np.Duration;
+
+            // Update UI
+            PositionSlider.Value = predicted;
+            PositionLabel.Text = FormatTime(predicted);
+        }
+
+        private void OnPositionSliderDragCompleted(object sender, EventArgs e)
+        {
+            int newPos = (int)PositionSlider.Value;
+
+            // Send seek command to server
+            App.Connection.SendCommand($"SEEK|{newPos}");
+
+            // Update local prediction baseline
+            _lastServerPosition = newPos;
+            _lastNowPlayingTimestamp = DateTime.Now;
+        }
+        private async void OnToggleClicked(object sender, EventArgs e)
+        {
+            App.Connection.SendCommand("toggle");
+        }
+        private async void OnStopClicked(object sender, EventArgs e)
+        {
+            App.Connection.SendCommand("stop");
+        }
+        private async void OnNextClicked(object sender, EventArgs e)
+        {
+            App.Connection.SendCommand("next");
+        }
+        private async void OnPreviousClicked(object sender, EventArgs e)
+        {
+            App.Connection.SendCommand("previous");
+        }
+        private void OnVolumeSliderChanged(object sender, ValueChangedEventArgs e)
+        {
+            if (_suppressVolumeEvent)
+                return;
+
+            float v = (float)e.NewValue;
+            int percent = (int)(v * 100);
+
+            if (percent == _lastSentVolume)
+                return;
+
+            _lastSentVolume = percent;
+
+            App.Connection.SetVolume(percent);
+        }
+        private void OnMuteClicked(object sender, EventArgs e)
+        {
+            App.Connection.SetMute(!_isMuted);
+        }
+        private void OnStreamToggleClicked(object sender, EventArgs e)
+        {
+            if (_isStreaming)
+            {
+                StopAudioStream();
+            }
+            else
+            {
+                StartAudioStream();
+            }
         }
 
         public void SetConnectionState(bool connected)
@@ -87,7 +245,7 @@ namespace SkyeMusicCompanion
             CurrentTitleLabel.Text = now.CurrentTitle;
             TitleLabel.Text = now.Title;
             if (now.CurrentTitle == now.Title)
-            {    
+            {
                 TitleLabel.IsVisible = false;
             }
             else
@@ -136,9 +294,9 @@ namespace SkyeMusicCompanion
             {
                 // --- FIX FOR STALE ARTWORK ---
                 ArtworkImage.Source = null;
-                ArtworkImage.IsVisible = false;         
-                await Task.Delay(10);                       
-                ArtworkImage.Source = null;                
+                ArtworkImage.IsVisible = false;
+                await Task.Delay(10);
+                ArtworkImage.Source = null;
             }
             if (now.PlayState?.Equals("playing", StringComparison.OrdinalIgnoreCase) == true)
             {
@@ -170,140 +328,31 @@ namespace SkyeMusicCompanion
             var ts = TimeSpan.FromSeconds(seconds);
             return $"{(int)ts.TotalMinutes}:{ts.Seconds:D2}";
         }
-
-        private void OnConnected()
+        private void StartAudioStream()
         {
-            MainThread.BeginInvokeOnMainThread(() =>
+            string streamUrl = $"http://{Settings.HostServerIp}:{Settings.StreamServerPort}/live";
+
+            // Custom headers to cleanly identify your client app and version on the server
+            var headers = new Dictionary<string, string>
             {
-                PositionSlider.IsEnabled = true;
-                VolumeSlider.IsEnabled = true;
-                MuteButton.IsEnabled = true;
-            });
+                { "User-Agent", $"Skye Music Companion/{AppInfo.Current.VersionString}" }
+            };
+
+            // Assign the source with custom headers
+            AudioStreamPlayer.Source = MediaSource.FromUri(new Uri(streamUrl), headers);
+            AudioStreamPlayer.Play();
+
+            _isStreaming = true;
+            StreamToggleButton.ImageSource = "streamactive.svg";
         }
-        private void OnDisconnected()
+        private void StopAudioStream()
         {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
+            AudioStreamPlayer.Stop();
+            AudioStreamPlayer.Source = null;
 
-                // Reset sliders
-                PositionSlider.Value = 0;
-                VolumeSlider.Value = 0;
-
-                // Reset mute state
-                _isMuted = false;
-                MuteButton.ImageSource = "volume.png";
-
-                // Disable controls
-                PositionSlider.IsEnabled = false;
-                VolumeSlider.IsEnabled = false;
-                MuteButton.IsEnabled = false;
-
-            });
-        }
-        private void OnNowPlayingReceived()
-        {
-            Dispatcher.Dispatch(() =>
-            {
-                UpdateNowPlaying(App.Connection.now);
-            });
-        }
-        private void OnVolumeReceived(string line)
-        {
-            var parts = line.Split('|');
-            if (parts.Length == 2 && int.TryParse(parts[1], out int percent))
-            {
-                float vol = percent / 100f;
-
-                Dispatcher.Dispatch(() =>
-                {
-                    _suppressVolumeEvent = true;
-                    VolumeSlider.Value = vol;
-                    _suppressVolumeEvent = false;
-                });
-            }
-        }
-        private void OnMuteReceived(string line)
-        {
-            var parts = line.Split('|');
-            if (parts.Length == 2 && bool.TryParse(parts[1], out bool muted))
-            {
-                Dispatcher.Dispatch(() =>
-                {
-                    _isMuted = muted;
-                    MuteButton.ImageSource = muted ? "volumemute.png" : "volume.png";
-                });
-            }
-        }
-        private void OnVolumeSliderChanged(object sender, ValueChangedEventArgs e)
-        {
-            if (_suppressVolumeEvent)
-                return;
-
-            float v = (float)e.NewValue;
-            int percent = (int)(v * 100);
-
-            if (percent == _lastSentVolume)
-                return;
-
-            _lastSentVolume = percent;
-
-            App.Connection.SetVolume(percent);
-        }
-        private void OnMuteClicked(object sender, EventArgs e)
-        {
-            App.Connection.SetMute(!_isMuted);
-        }
-        private void OnPositionSliderDragCompleted(object sender, EventArgs e)
-        {
-            int newPos = (int)PositionSlider.Value;
-
-            // Send seek command to server
-            App.Connection.SendCommand($"SEEK|{newPos}");
-
-            // Update local prediction baseline
-            _lastServerPosition = newPos;
-            _lastNowPlayingTimestamp = DateTime.Now;
-        }
-        private async void OnToggleClicked(object sender, EventArgs e)
-        {
-            App.Connection.SendCommand("toggle");
-        }
-        private async void OnStopClicked(object sender, EventArgs e)
-        {
-            App.Connection.SendCommand("stop");
-        }
-        private async void OnNextClicked(object sender, EventArgs e)
-        {
-            App.Connection.SendCommand("next");
-        }
-        private async void OnPreviousClicked(object sender, EventArgs e)
-        {
-            App.Connection.SendCommand("previous");
+            _isStreaming = false;
+            StreamToggleButton.ImageSource = "streamoff.svg";
         }
 
-        private void OnPositionTimerTick(object? sender, EventArgs e)
-        {
-            var np = App.Connection.now;
-
-            if (App.Connection.IsConnected == false || np == null)
-                return;
-
-            // Only animate if playing
-            if (!np.PlayState.Equals("playing", StringComparison.OrdinalIgnoreCase))
-                return;
-
-            // How long since the last NOWPLAYING snapshot?
-            var elapsed = (int)(DateTime.Now - _lastNowPlayingTimestamp).TotalSeconds;
-
-            int predicted = _lastServerPosition + elapsed;
-
-            // Clamp
-            if (predicted > np.Duration)
-                predicted = np.Duration;
-
-            // Update UI
-            PositionSlider.Value = predicted;
-            PositionLabel.Text = FormatTime(predicted);
-        }
     }
 }

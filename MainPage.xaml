@@ -9,7 +9,9 @@
         <!-- Hidden MediaElement for live audio streaming -->
         <toolkit:MediaElement x:Name="AudioStreamPlayer"
                               ShouldAutoPlay="False"
-                              IsVisible="False" />
+                              IsVisible="False"
+                              StateChanged="OnMediaStateChanged"
+                              MediaFailed="OnMediaFailed" />
     
         <ScrollView>
 
@@ -109,9 +111,9 @@
                                     Clicked="OnNextClicked" />
                         </Grid>
 
-                        <!-- Mute + Volume Slider -->
-                        <Grid Grid.Row="3" Grid.ColumnSpan="2"
-                              ColumnDefinitions="Auto,*"
+                        <!-- Mute + Volume Slider + Stream Toggle Button -->
+                        <Grid Grid.Row="3" Grid.ColumnSpan="3"
+                              ColumnDefinitions="Auto,*,Auto"
                               Margin="0,0,0,0">
 
                             <!-- Mute Button -->
@@ -159,18 +161,17 @@
                                     ValueChanged="OnVolumeSliderChanged"
                                     AbsoluteLayout.LayoutBounds="0,0,1,1"
                                     AbsoluteLayout.LayoutFlags="All" />
-
+                            
                             </AbsoluteLayout>
-
                             <!-- Stream Toggle Button (Right) -->
                             <Button x:Name="StreamToggleButton"
-                                    Grid.Column="2"
+                                    Grid.Column="3"
                                     BackgroundColor="#8b1a10"
                                     WidthRequest="64"
                                     HeightRequest="64"
                                     ImageSource="streamoff.svg"
-                                    Clicked="OnStreamToggleClicked" />
-                        
+                                    Clicked="OnStreamToggleClicked" />    
+                            
                         </Grid>
 
                     </Grid>
