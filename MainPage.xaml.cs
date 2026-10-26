@@ -394,6 +394,7 @@ namespace SkyeMusicCompanion
                         };
 
                         freshPlayer.StateChanged += OnMediaStateChanged!;
+                        freshPlayer.MediaEnded += OnMediaEnded!;
                         freshPlayer.MediaFailed += OnMediaFailed!;
 
                         // Reassign your page-level reference to the new instance
