@@ -12,6 +12,7 @@
                               ShouldAutoPlay="False"
                               IsVisible="False"
                               StateChanged="OnMediaStateChanged"
+                              MediaEnded="OnMediaEnded"
                               MediaFailed="OnMediaFailed" />
         </VerticalStackLayout>
         

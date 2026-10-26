@@ -131,8 +131,14 @@ namespace SkyeMusicCompanion
         {
             System.Diagnostics.Debug.WriteLine($"---> MediaState Changed: {e.NewState}");
         }
+        private void OnMediaEnded(object sender, EventArgs e)
+        {
+            StopAudioStream();
+            System.Diagnostics.Debug.WriteLine($"---> Media Ended");
+        }
         private void OnMediaFailed(object sender, MediaFailedEventArgs e)
         {
+            StopAudioStream();
             System.Diagnostics.Debug.WriteLine($"---> Media Failed: {e.ErrorMessage}");
         }
         private void OnPositionTimerTick(object? sender, EventArgs e)
