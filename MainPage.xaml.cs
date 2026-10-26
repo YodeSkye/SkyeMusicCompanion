@@ -364,13 +364,21 @@ namespace SkyeMusicCompanion
                 AudioStreamPlayer.Source = null;
 
                 // 2. Windows-only hard reset: Remove and re-add the MediaElement from the visual tree
-                // This forces WinUI 3 to violently destroy the underlying native MediaPlayer and drop the socket.
                 if (DeviceInfo.Platform == DevicePlatform.WinUI)
                 {
                     int index = PlayerContainer.Children.IndexOf(AudioStreamPlayer);
                     if (index >= 0)
                     {
+                        // Capture the old reference so we can explicitly murder its native resources
+                        var oldPlayer = AudioStreamPlayer;
+
                         PlayerContainer.Children.RemoveAt(index);
+
+                        // --- FORCE NATIVE DISPOSAL ---
+                        // This instructs WinUI and WMF to drop the underlying COM pointer and network socket right now.
+                        oldPlayer.Handler?.DisconnectHandler(); // Safe explicit disconnect if available, or call Dispose directly:
+                        oldPlayer.Dispose();
+                        // -----------------------------
 
                         // Instantiate a fresh MediaElement
                         var freshPlayer = new CommunityToolkit.Maui.Views.MediaElement
