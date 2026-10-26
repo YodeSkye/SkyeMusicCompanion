@@ -328,11 +328,10 @@ namespace SkyeMusicCompanion
             var ts = TimeSpan.FromSeconds(seconds);
             return $"{(int)ts.TotalMinutes}:{ts.Seconds:D2}";
         }
-
-
         private void StartAudioStream()
         {
-            string serverUrl = $"http://{Settings.HostServerIp}:{Settings.StreamServerPort}/live";
+            // Append a unique timestamp tick so Windows Media Foundation never caches the stream URL
+            string serverUrl = $"http://{Settings.HostServerIp}:{Settings.StreamServerPort}/live?nocache={DateTime.Now.Ticks}";
             string userAgent = $"Skye Music Companion/{AppInfo.Current.VersionString}";
 
             if (DeviceInfo.Platform == DevicePlatform.WinUI)
@@ -354,17 +353,50 @@ namespace SkyeMusicCompanion
             AudioStreamPlayer.Play();
 
             _isStreaming = true;
-            StreamToggleButton.ImageSource = "streamactive.svg";
+            StreamToggleButton.ImageSource = "streamactive.png";
         }
-
         private void StopAudioStream()
         {
-            AudioStreamPlayer.Stop();
-            AudioStreamPlayer.Source = null;
+            try
+            {
+                // 1. Stop playback and clear source
+                AudioStreamPlayer.Stop();
+                AudioStreamPlayer.Source = null;
+
+                // 2. Windows-only hard reset: Remove and re-add the MediaElement from the visual tree
+                // This forces WinUI 3 to violently destroy the underlying native MediaPlayer and drop the socket.
+                if (DeviceInfo.Platform == DevicePlatform.WinUI)
+                {
+                    int index = PlayerContainer.Children.IndexOf(AudioStreamPlayer);
+                    if (index >= 0)
+                    {
+                        PlayerContainer.Children.RemoveAt(index);
+
+                        // Instantiate a fresh MediaElement
+                        var freshPlayer = new CommunityToolkit.Maui.Views.MediaElement
+                        {
+                            ShouldAutoPlay = false,
+                            IsVisible = false
+                        };
+
+                        freshPlayer.StateChanged += OnMediaStateChanged!;
+                        freshPlayer.MediaFailed += OnMediaFailed!;
+
+                        // Reassign your page-level reference to the new instance
+                        AudioStreamPlayer = freshPlayer;
+
+                        // Insert it back into the container layout
+                        PlayerContainer.Children.Insert(index, freshPlayer);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[STREAM STOP ERROR] {ex.Message}");
+            }
 
             _isStreaming = false;
-            StreamToggleButton.ImageSource = "streamoff.svg";
+            StreamToggleButton.ImageSource = "streamoff.png";
         }
-
     }
 }
