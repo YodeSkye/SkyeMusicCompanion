@@ -133,13 +133,19 @@ namespace SkyeMusicCompanion
         }
         private void OnMediaEnded(object sender, EventArgs e)
         {
-            StopAudioStream();
-            System.Diagnostics.Debug.WriteLine($"---> Media Ended");
+            Dispatcher.Dispatch(() =>
+            {
+                StopAudioStream();
+                System.Diagnostics.Debug.WriteLine("---> Media Ended");
+            });
         }
         private void OnMediaFailed(object sender, MediaFailedEventArgs e)
         {
-            StopAudioStream();
-            System.Diagnostics.Debug.WriteLine($"---> Media Failed: {e.ErrorMessage}");
+            Dispatcher.Dispatch(() =>
+            {
+                StopAudioStream();
+                System.Diagnostics.Debug.WriteLine($"---> Media Failed: {e.ErrorMessage}");
+            });
         }
         private void OnPositionTimerTick(object? sender, EventArgs e)
         {
@@ -363,6 +369,18 @@ namespace SkyeMusicCompanion
         }
         private void StopAudioStream()
         {
+            // Ensure we are executing on the UI thread for safety
+            if (!Dispatcher.IsDispatchRequired)
+            {
+                ExecuteStopStreamInternal();
+            }
+            else
+            {
+                Dispatcher.Dispatch(ExecuteStopStreamInternal);
+            }
+        }
+        private void ExecuteStopStreamInternal()
+        {
             try
             {
                 // 1. Stop playback and clear source
@@ -375,14 +393,11 @@ namespace SkyeMusicCompanion
                     int index = PlayerContainer.Children.IndexOf(AudioStreamPlayer);
                     if (index >= 0)
                     {
-                        // Capture the old reference so we can explicitly murder its native resources
                         var oldPlayer = AudioStreamPlayer;
-
                         PlayerContainer.Children.RemoveAt(index);
 
                         // --- FORCE NATIVE DISPOSAL ---
-                        // This instructs WinUI and WMF to drop the underlying COM pointer and network socket right now.
-                        oldPlayer.Handler?.DisconnectHandler(); // Safe explicit disconnect if available, or call Dispose directly:
+                        oldPlayer.Handler?.DisconnectHandler();
                         oldPlayer.Dispose();
                         // -----------------------------
 
@@ -397,10 +412,7 @@ namespace SkyeMusicCompanion
                         freshPlayer.MediaEnded += OnMediaEnded!;
                         freshPlayer.MediaFailed += OnMediaFailed!;
 
-                        // Reassign your page-level reference to the new instance
                         AudioStreamPlayer = freshPlayer;
-
-                        // Insert it back into the container layout
                         PlayerContainer.Children.Insert(index, freshPlayer);
                     }
                 }
