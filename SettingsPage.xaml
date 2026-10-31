@@ -12,12 +12,11 @@
 
         <!-- IP Group -->
         <VerticalStackLayout Spacing="0">
-            <Label Text="Host Server IP"
+            <Label Text="Host Server IP or Domain"
                    FontAttributes="Bold" />
-            <Entry x:Name="IpEntry"
+            <Entry x:Name="HostEntry"
                    Placeholder="192.168.1.100"
-                   Keyboard="Numeric"
-                   Unfocused="OnIpChanged" />
+                   Unfocused="OnHostChanged" />
         </VerticalStackLayout>
 
         <!-- Port Group -->
