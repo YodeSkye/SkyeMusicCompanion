@@ -25,6 +25,9 @@ Built with .NET 10 MAUI, the Companion connects to the SkyeMusic server over TCP
 - Previous
 - Low‑latency command sending via TCP
 
+### 🔊 Audio Streaming Toggle
+- Enable or disable audio streaming from the SkyeMusic host
+
 ### 📄 Playlist Viewer
 - Search your playlist
 - See the current song highlighted
@@ -83,6 +86,7 @@ Displays:
 - Playback state  
 - Transport controls  
 - Connection status icon
+- Audio Streaming Toggle
 
 ### Playlist
 - Full browsing of your Skye Music playlist
@@ -107,7 +111,6 @@ Displays:
 
 ## 🚀 Roadmap
 
-- Audio Streaming
 - Visual polish and animations
 
 ## 📄 License
