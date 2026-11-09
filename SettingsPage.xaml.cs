@@ -10,8 +10,7 @@ public partial class SettingsPage : ContentPage
 
         // Load saved values
         HostEntry.Text = Settings.HostServerIp;
-        PortEntry.Text = Settings.HostServerPort.ToString();
-        StreamPortEntry.Text = Settings.StreamServerPort.ToString();
+        StreamEntry.Text = Settings.StreamServerIp;
         TapActionPicker.SelectedIndex = Settings.PlaylistTapAction == TapAction.Play ? 0 : 1;
         KeepAwakeSwitch.IsToggled = Settings.KeepScreenAwake;
     }
@@ -19,8 +18,7 @@ public partial class SettingsPage : ContentPage
     {
         base.OnDisappearing();
         HostEntry.Unfocus();
-        PortEntry.Unfocus();
-        StreamPortEntry.Unfocus();
+        StreamEntry.Unfocus();
         TapActionPicker.Unfocus();
         await App.Connection.ReconnectAsync();
     }
@@ -32,49 +30,92 @@ public partial class SettingsPage : ContentPage
         if (string.IsNullOrWhiteSpace(rawInput))
             return;
 
-        // 1. Strip http:// or https:// if pasted
-        if (rawInput.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
-            rawInput = rawInput[7..];
-        else if (rawInput.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-            rawInput = rawInput[8..];
+        // 1. Handle Web URLs (http:// or https://)
+        if (Uri.TryCreate(rawInput, UriKind.Absolute, out Uri? uri) &&
+            (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
+        {
+            // Extract port to setting/UI if non-standard port was supplied
+            if (!uri.IsDefaultPort)
+            {
+                Settings.HostServerPort = uri.Port;
+            }
 
-        // 2. Strip trailing slashes or path segments (e.g., domain.com/api -> domain.com)
+            // Clean out port and path segments -> https://stream.skye.com
+            string cleanUrl = $"{uri.Scheme}://{uri.Host}";
+
+            Settings.HostServerIp = cleanUrl;
+            HostEntry.Text = cleanUrl;
+
+            Log.Write("SETTINGS: HostServerIp updated to " + cleanUrl);
+            return;
+        }
+
+        // 2. Handle Plain IPs or Domains (e.g. 10.0.0.211:5050 or myhost.local:5050)
         int slashIndex = rawInput.IndexOf('/');
         if (slashIndex >= 0)
             rawInput = rawInput[..slashIndex];
 
-        // 3. Handle inline port pasting (e.g., skyemusic.duckdns.org:5050)
         int colonIndex = rawInput.LastIndexOf(':');
-        if (colonIndex > 0 && !rawInput.Contains(']')) // Ignores IPv6 brackets if used
+        if (colonIndex > 0 && !rawInput.Contains(']')) // Skip IPv6 brackets
         {
-            string hostPart = rawInput[..colonIndex];
             string portPart = rawInput[(colonIndex + 1)..];
 
             if (int.TryParse(portPart, out int extractedPort))
             {
-                // Automatically update the port setting and UI entry if a port was included in the paste
+                // Update port setting & entry
                 Settings.HostServerPort = extractedPort;
-                PortEntry.Text = extractedPort.ToString();
             }
-
-            rawInput = hostPart;
         }
 
-        // 4. Save the sanitized host string and update the UI entry display
+        // Keep full 10.0.0.211:5050 string intact for raw IP view
         Settings.HostServerIp = rawInput;
         HostEntry.Text = rawInput;
 
         Log.Write("SETTINGS: HostServerIp updated to " + rawInput);
     }
-    private void OnPortChanged(object sender, EventArgs e)
+    private void OnStreamChanged(object sender, EventArgs e)
     {
-        if (int.TryParse(PortEntry.Text, out int port))
-            Settings.HostServerPort = port;
-    }
-    private void OnStreamPortChanged(object sender, EventArgs e)
-    {
-        if (int.TryParse(StreamPortEntry.Text, out int streamPort))
-            Settings.StreamServerPort = streamPort;
+        string rawInput = StreamEntry.Text?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(rawInput))
+            return;
+
+        if (Uri.TryCreate(rawInput, UriKind.Absolute, out Uri? uri) &&
+            (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
+        {
+            if (!uri.IsDefaultPort)
+            {
+                Settings.StreamServerPort = uri.Port;
+            }
+
+            string cleanUrl = $"{uri.Scheme}://{uri.Host}";
+
+            Settings.StreamServerIp = cleanUrl;
+            StreamEntry.Text = cleanUrl;
+
+            Log.Write("SETTINGS: StreamServerIp updated to " + cleanUrl);
+            return;
+        }
+
+        int slashIndex = rawInput.IndexOf('/');
+        if (slashIndex >= 0)
+            rawInput = rawInput[..slashIndex];
+
+        int colonIndex = rawInput.LastIndexOf(':');
+        if (colonIndex > 0 && !rawInput.Contains(']'))
+        {
+            string portPart = rawInput[(colonIndex + 1)..];
+
+            if (int.TryParse(portPart, out int extractedPort))
+            {
+                Settings.StreamServerPort = extractedPort;
+            }
+        }
+
+        Settings.StreamServerIp = rawInput;
+        StreamEntry.Text = rawInput;
+
+        Log.Write("SETTINGS: StreamServerIp updated to " + rawInput);
     }
     private void OnTapActionChanged(object sender, EventArgs e)
     {
