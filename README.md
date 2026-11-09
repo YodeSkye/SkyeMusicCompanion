@@ -1,7 +1,7 @@
-# SkyeMusic Companion
+# Skye Music Companion
 
-A lightweight, cross‑platform remote control app for the SkyeMusic host player.  
-Built with .NET 10 MAUI, the Companion connects to the SkyeMusic server over TCP, displays real‑time Now Playing information, and provides full transport controls from anywhere on your local network.
+A lightweight, cross‑platform remote control app for the Skye Music host player.  
+Built with .NET 10 MAUI, the Companion connects to the Skye Music server over TCP, displays real‑time Now Playing information, and provides full transport controls from anywhere on your local network.
 
 ## ✨ Features
 
@@ -12,7 +12,7 @@ Built with .NET 10 MAUI, the Companion connects to the SkyeMusic server over TCP
 - Artwork display with safe fallback handling  
 
 ### 📡 Reliable TCP Connection
-- Connects to the SkyeMusic host over LAN  
+- Connects to the Skye Music host over LAN  
 - Automatic HELLO handshake with device name  
 - Reconnect support  
 - Clean connection/disconnection events  
@@ -26,7 +26,7 @@ Built with .NET 10 MAUI, the Companion connects to the SkyeMusic server over TCP
 - Low‑latency command sending via TCP
 
 ### 🔊 Audio Streaming Toggle
-- Enable or disable audio streaming from the SkyeMusic host
+- Enable or disable audio streaming from the Skye Music host
 
 ### 📄 Playlist Viewer
 - Search your playlist
@@ -46,14 +46,14 @@ Built with .NET 10 MAUI, the Companion connects to the SkyeMusic server over TCP
 ## 🔌 How It Works
 
 ### 1. Companion connects to the server
-The app opens a TCP connection to the SkyeMusic host using the IP and port configured in Settings.
+The app opens a TCP connection to the Skye Music host using the IP and port configured in Settings.
 
 ### 2. HELLO handshake
 Immediately after connecting, the Companion sends: hello<device name>
 The device name is retrieved using `DeviceInfo.Name`, giving a friendly, user‑set name on Android and Windows.
 
 ### 3. Server identifies the client
-The SkyeMusic server assigns:
+The Skye Music server assigns:
 - DeviceName  
 - ConnectedAt  
 - LastMessageAt  
@@ -106,7 +106,7 @@ Displays:
 
 - .NET 10
 - .NET MAUI workload  
-- SkyeMusic host server running on the same network  
+- Skye Music host server running on the same network  
 - TCP port open between devices
 
 ## 🚀 Roadmap
@@ -126,5 +126,5 @@ Pull requests should be focused, clear, and limited to a single purpose.
 
 ## 💬 About
 
-SkyeMusic Companion is part of the SkyeMusic ecosystem — a personal, local‑network music controller designed for clarity, reliability, and emotionally safe everyday use.  
-It provides a simple, responsive interface for controlling playback and viewing Now Playing information from the SkyeMusic host application.
+Skye Music Companion is part of the Skye Music ecosystem — a personal, local‑network music controller designed for clarity, reliability, and emotionally safe everyday use.  
+It provides a simple, responsive interface for controlling playback and viewing Now Playing information from the Skye Music host application.
