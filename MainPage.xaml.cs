@@ -342,8 +342,11 @@ namespace SkyeMusicCompanion
         }
         private void StartAudioStream()
         {
-            // Append a unique timestamp tick so Windows Media Foundation never caches the stream URL
-            string serverUrl = $"http://{Settings.HostServerIp}:{Settings.StreamServerPort}/live?nocache={DateTime.Now.Ticks}";
+            // Use the builder to get the correct scheme, host, and port (handling local IPs or Cloudflare tunnels)
+            var (_, _, baseUrl) = ServerEndpointBuilder.Parse(Settings.StreamServerIp, 5051);
+
+            // Append /live and the unique timestamp cache-buster
+            string serverUrl = $"{baseUrl}/live?nocache={DateTime.Now.Ticks}";
             string userAgent = $"Skye Music Companion/{AppInfo.Current.VersionString}";
 
             if (DeviceInfo.Platform == DevicePlatform.WinUI)
@@ -353,7 +356,7 @@ namespace SkyeMusicCompanion
             }
             else
             {
-                // Android: Direct URI assignment with your existing headers dictionary
+                // Android: Direct URI assignment with existing headers dictionary
                 var headers = new Dictionary<string, string>
         {
             { "User-Agent", userAgent }

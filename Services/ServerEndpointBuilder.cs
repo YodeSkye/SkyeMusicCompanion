@@ -1,43 +1,43 @@
-﻿namespace SkyeMusicCompanion.Services;
-
-public static class ServerEndpointBuilder
+﻿namespace SkyeMusicCompanion.Services
 {
-    public static (string Endpoint, int Port) Parse(string rawInput, int defaultPort)
+    public static class ServerEndpointBuilder
     {
-        if (string.IsNullOrWhiteSpace(rawInput))
-            return (string.Empty, defaultPort);
-
-        string cleaned = rawInput.Trim();
-
-        // 1. Handle explicit full URLs (http://, https://) like Cloudflare tunnels
-        if (cleaned.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-            cleaned.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        public static (string TcpHost, int TcpPort, string BaseUrl) Parse(string rawInput, int defaultPort)
         {
+            if (string.IsNullOrWhiteSpace(rawInput))
+                return (string.Empty, defaultPort, string.Empty);
+
+            string cleaned = rawInput.Trim();
+
+            if (!cleaned.Contains("://"))
+            {
+                cleaned = "http://" + cleaned;
+            }
+
             if (Uri.TryCreate(cleaned, UriKind.Absolute, out Uri? uri))
             {
-                // Extract explicit port if specified in the URL (e.g. https://test.com:5050)
-                int urlPort = !uri.IsDefaultPort ? uri.Port : (uri.Scheme == Uri.UriSchemeHttps ? 443 : 80);
+                string scheme = uri.Scheme;
+                string host = uri.Host;
+                int port = !uri.IsDefaultPort ? uri.Port : (scheme.Equals("https", StringComparison.OrdinalIgnoreCase) ? 443 : defaultPort);
 
-                // Return clean base scheme and host (stripping path/port for the clean endpoint)
-                string cleanBase = $"{uri.Scheme}://{uri.Host}";
-                return (cleanBase, urlPort);
+                // Build clean base URL (e.g., http://10.0.0.211:5050 or https://my-tunnel.trycloudflare.com)
+                string baseUrl;
+                bool isDefaultHttp = scheme.Equals("http", StringComparison.OrdinalIgnoreCase) && port == 80;
+                bool isDefaultHttps = scheme.Equals("https", StringComparison.OrdinalIgnoreCase) && port == 443;
+
+                if (uri.IsDefaultPort || isDefaultHttp || isDefaultHttps)
+                {
+                    baseUrl = $"{scheme}://{host}";
+                }
+                else
+                {
+                    baseUrl = $"{scheme}://{host}:{port}";
+                }
+
+                return (host, port, baseUrl);
             }
+
+            return (rawInput.TrimEnd('/'), defaultPort, $"http://{rawInput}");
         }
-
-        // 2. Handle raw IPs or domains with or without inline ports (e.g. 10.0.0.211:5050)
-        string candidate = "http://" + cleaned;
-
-        if (Uri.TryCreate(candidate, UriKind.Absolute, out Uri? parsedUri))
-        {
-            string host = parsedUri.Host;
-            int port = !parsedUri.IsDefaultPort ? parsedUri.Port : defaultPort;
-
-            // Reconstruct a clean host string (or IP:port if you prefer keeping the port in the endpoint view)
-            string endpoint = parsedUri.IsDefaultPort ? host : $"{host}:{port}";
-
-            return ($"http://{endpoint}", port);
-        }
-
-        return (rawInput.TrimEnd('/'), defaultPort);
     }
 }

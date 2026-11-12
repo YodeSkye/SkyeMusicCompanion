@@ -34,12 +34,6 @@ public partial class SettingsPage : ContentPage
         if (Uri.TryCreate(rawInput, UriKind.Absolute, out Uri? uri) &&
             (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
         {
-            // Extract port to setting/UI if non-standard port was supplied
-            if (!uri.IsDefaultPort)
-            {
-                Settings.HostServerPort = uri.Port;
-            }
-
             // Clean out port and path segments -> https://stream.skye.com
             string cleanUrl = $"{uri.Scheme}://{uri.Host}";
 
@@ -54,18 +48,6 @@ public partial class SettingsPage : ContentPage
         int slashIndex = rawInput.IndexOf('/');
         if (slashIndex >= 0)
             rawInput = rawInput[..slashIndex];
-
-        int colonIndex = rawInput.LastIndexOf(':');
-        if (colonIndex > 0 && !rawInput.Contains(']')) // Skip IPv6 brackets
-        {
-            string portPart = rawInput[(colonIndex + 1)..];
-
-            if (int.TryParse(portPart, out int extractedPort))
-            {
-                // Update port setting & entry
-                Settings.HostServerPort = extractedPort;
-            }
-        }
 
         // Keep full 10.0.0.211:5050 string intact for raw IP view
         Settings.HostServerIp = rawInput;
@@ -83,11 +65,6 @@ public partial class SettingsPage : ContentPage
         if (Uri.TryCreate(rawInput, UriKind.Absolute, out Uri? uri) &&
             (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
         {
-            if (!uri.IsDefaultPort)
-            {
-                Settings.StreamServerPort = uri.Port;
-            }
-
             string cleanUrl = $"{uri.Scheme}://{uri.Host}";
 
             Settings.StreamServerIp = cleanUrl;
@@ -100,17 +77,6 @@ public partial class SettingsPage : ContentPage
         int slashIndex = rawInput.IndexOf('/');
         if (slashIndex >= 0)
             rawInput = rawInput[..slashIndex];
-
-        int colonIndex = rawInput.LastIndexOf(':');
-        if (colonIndex > 0 && !rawInput.Contains(']'))
-        {
-            string portPart = rawInput[(colonIndex + 1)..];
-
-            if (int.TryParse(portPart, out int extractedPort))
-            {
-                Settings.StreamServerPort = extractedPort;
-            }
-        }
 
         Settings.StreamServerIp = rawInput;
         StreamEntry.Text = rawInput;

@@ -48,7 +48,7 @@ namespace SkyeMusicCompanion
             //});
             
             // Start connection AFTER window exists
-            _ = Connection.ConnectAsync(Settings.HostServerIp, Settings.HostServerPort);
+            _ = Connection.ConnectAsync(Settings.HostServerIp);
 
         }
        
