@@ -5,24 +5,14 @@ public static class Settings
 {
     public static string HostServerIp
     {
-        get => Preferences.Get(nameof(HostServerIp), "192.168.1.1");
+        get => Preferences.Get(nameof(HostServerIp), "192.168.1.1:5050");
         set => Preferences.Set(nameof(HostServerIp), value);
     }
-    //public static int HostServerPort
-    //{
-    //    get => Preferences.Get(nameof(HostServerPort), 5050);
-    //    set => Preferences.Set(nameof(HostServerPort), value);
-    //}
     public static string StreamServerIp
     {
-        get => Preferences.Get(nameof(StreamServerIp), "192.168.1.1");
+        get => Preferences.Get(nameof(StreamServerIp), "192.168.1.1:5051");
         set => Preferences.Set(nameof(StreamServerIp), value);
     }
-    //public static int StreamServerPort
-    //{
-    //    get => Preferences.Get(nameof(StreamServerPort), 5051);
-    //    set => Preferences.Set(nameof(StreamServerPort), value);
-    //}
     public static TapAction PlaylistTapAction
     {
         get => (TapAction)Preferences.Get(nameof(PlaylistTapAction), (int)TapAction.Play);
