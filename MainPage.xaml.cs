@@ -342,11 +342,10 @@ namespace SkyeMusicCompanion
         }
         private void StartAudioStream()
         {
-            // Use the builder to get the correct scheme, host, and port (handling local IPs or Cloudflare tunnels)
-            var (_, _, baseUrl) = ServerEndpointBuilder.Parse(Settings.StreamServerIp, 5051);
+            var (host, port) = ServerEndpointBuilder.Parse(Settings.StreamServerIp, 5051);
 
-            // Append /live and the unique timestamp cache-buster
-            string serverUrl = $"{baseUrl}/live?nocache={DateTime.Now.Ticks}";
+            // Build the direct HTTP stream URL with the cache-buster
+            string serverUrl = $"http://{host}:{port}/live?nocache={DateTime.Now.Ticks}";
             string userAgent = $"Skye Music Companion/{AppInfo.Current.VersionString}";
 
             if (DeviceInfo.Platform == DevicePlatform.WinUI)

@@ -32,8 +32,7 @@ namespace SkyeMusicCompanion.Services
             {
                 _cts = new CancellationTokenSource();
 
-                // ServerEndpointBuilder does all the work now!
-                var (host, port, baseurl) = ServerEndpointBuilder.Parse(endpointInput, 5050);
+                var (host, port) = ServerEndpointBuilder.Parse(endpointInput, 5050);
 
                 _client = new TcpClient();
                 await _client.ConnectAsync(host, port);

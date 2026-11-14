@@ -2,42 +2,28 @@
 {
     public static class ServerEndpointBuilder
     {
-        public static (string TcpHost, int TcpPort, string BaseUrl) Parse(string rawInput, int defaultPort)
+        public static (string Host, int Port) Parse(string rawInput, int defaultPort)
         {
             if (string.IsNullOrWhiteSpace(rawInput))
-                return (string.Empty, defaultPort, string.Empty);
+                return (string.Empty, defaultPort);
 
-            string cleaned = rawInput.Trim();
+            string cleaned = rawInput.Trim().TrimEnd('/');
+            if (cleaned.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
+                cleaned = cleaned[7..];
+            else if (cleaned.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                cleaned = cleaned[8..];
 
-            if (!cleaned.Contains("://"))
+            string host = cleaned;
+            int port = defaultPort;
+
+            int colonIndex = cleaned.LastIndexOf(':');
+            if (colonIndex > 0 && int.TryParse(cleaned.AsSpan(colonIndex + 1), out int parsedPort))
             {
-                cleaned = "http://" + cleaned;
+                host = cleaned[..colonIndex];
+                port = parsedPort;
             }
 
-            if (Uri.TryCreate(cleaned, UriKind.Absolute, out Uri? uri))
-            {
-                string scheme = uri.Scheme;
-                string host = uri.Host;
-                int port = !uri.IsDefaultPort ? uri.Port : (scheme.Equals("https", StringComparison.OrdinalIgnoreCase) ? 443 : defaultPort);
-
-                // Build clean base URL (e.g., http://10.0.0.211:5050 or https://my-tunnel.trycloudflare.com)
-                string baseUrl;
-                bool isDefaultHttp = scheme.Equals("http", StringComparison.OrdinalIgnoreCase) && port == 80;
-                bool isDefaultHttps = scheme.Equals("https", StringComparison.OrdinalIgnoreCase) && port == 443;
-
-                if (uri.IsDefaultPort || isDefaultHttp || isDefaultHttps)
-                {
-                    baseUrl = $"{scheme}://{host}";
-                }
-                else
-                {
-                    baseUrl = $"{scheme}://{host}:{port}";
-                }
-
-                return (host, port, baseUrl);
-            }
-
-            return (rawInput.TrimEnd('/'), defaultPort, $"http://{rawInput}");
+            return (host, port);
         }
     }
 }
