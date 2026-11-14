@@ -243,6 +243,9 @@ namespace SkyeMusicCompanion
         }
         public async void UpdateNowPlaying(NowPlaying now)
         {
+            // Will populate the android now playing card when minimized
+            AudioStreamPlayer.MetadataTitle = now.CurrentTitle;
+
             // Basic text fields
             bool isPlaying = now.PlayState.Equals("Playing", StringComparison.OrdinalIgnoreCase);
             int npduration = now.Duration;

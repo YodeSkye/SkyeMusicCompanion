@@ -12,7 +12,7 @@ namespace SkyeMusicCompanion
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
-                .UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: false)
+                .UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: true)
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
