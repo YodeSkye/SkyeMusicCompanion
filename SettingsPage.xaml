@@ -17,6 +17,8 @@
             <Entry x:Name="HostEntry"
                    Placeholder="e.g., 192.168.1.50 or 100.x.x.x:5050"
                    PlaceholderColor="Gray"
+                   Keyboard="Url"
+                   ClearButtonVisibility="WhileEditing"
                    Unfocused="OnHostChanged" />
         </VerticalStackLayout>
 
@@ -27,6 +29,8 @@
             <Entry x:Name="StreamEntry"
                    Placeholder="e.g., 192.168.1.50 or 100.x.x.x:5051"
                    PlaceholderColor="Gray"
+                   Keyboard="Url"
+                   ClearButtonVisibility="WhileEditing"
                    Unfocused="OnStreamChanged" />
         </VerticalStackLayout>
         
