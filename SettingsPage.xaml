@@ -12,19 +12,21 @@
 
         <!-- Host IP Group -->
         <VerticalStackLayout Spacing="0">
-            <Label Text="Host Server IP &amp; Port, or Domain"
+            <Label Text="Host Server IP &amp; Port"
                    FontAttributes="Bold" />
             <Entry x:Name="HostEntry"
-                   Placeholder="192.168.1.100"
+                   Placeholder="e.g., 192.168.1.50 or 100.x.x.x:5050"
+                   PlaceholderColor="Gray"
                    Unfocused="OnHostChanged" />
         </VerticalStackLayout>
 
         <!-- Stream IP Group -->
         <VerticalStackLayout Spacing="0">
-            <Label Text="Live Stream Server IP &amp; Port, or Domain"
+            <Label Text="Live Stream Server IP &amp; Port"
                    FontAttributes="Bold" />
             <Entry x:Name="StreamEntry"
-                   Placeholder="192.168.1.100"
+                   Placeholder="e.g., 192.168.1.50 or 100.x.x.x:5051"
+                   PlaceholderColor="Gray"
                    Unfocused="OnStreamChanged" />
         </VerticalStackLayout>
         
