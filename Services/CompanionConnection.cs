@@ -76,15 +76,27 @@ namespace SkyeMusicCompanion.Services
         public void Disconnect()
         {
             try { _cts?.Cancel(); } catch { }
+            try
+            {
+                if (_client != null && _client.Connected)
+                {
+                    _client.Client.Shutdown(SocketShutdown.Both);
+                }
+            }
+            catch { }
+            try { _writer?.Dispose(); } catch { }
             try { _client?.Close(); } catch { }
 
             PlaylistCleared?.Invoke();
             Disconnected?.Invoke();
             ScreenBehaviorManager.ResetToSystem();
 
+            _cts?.Dispose(); 
             _cts = null;
             _client = null;
             _writer = null;
+
+            Log.Write("Disconnected cleanly and socket shutdown initiated.");
         }
         private async Task ListenLoop(CancellationToken token)
         {

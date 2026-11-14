@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 
@@ -16,4 +17,21 @@ namespace SkyeMusicCompanion.Platforms.Android;
                            ConfigChanges.Density)]
 public class MainActivity : MauiAppCompatActivity
 {
+    protected override void OnDestroy()
+    {
+        CleanupConnection();
+        base.OnDestroy();
+    }
+    private static void CleanupConnection()
+    {
+        try
+        {
+            var connection = IPlatformApplication.Current?.Services.GetService<Services.CompanionConnection>();
+            connection?.Disconnect();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error during cleanup: {ex.Message}");
+        }
+    }
 }

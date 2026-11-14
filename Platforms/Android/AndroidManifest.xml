@@ -1,6 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.Skye.SkyeMusicCompanion">
-	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:supportsRtl="true" android:label="Skye Music Companion" android:usesCleartextTraffic="true"></application>
+
+	<!-- Required Permissions -->
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+	<application
+        android:allowBackup="true"
+        android:icon="@mipmap/appicon"
+        android:supportsRtl="true"
+        android:label="Skye Music Companion"
+        android:usesCleartextTraffic="true">
+
+		<!-- Required Media Playback Foreground Service for Android 14+ -->
+		<service
+            android:name="microsoft.maui.communitytoolkit.mediaelement.PlatformMediaPlaybackService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
+
+	</application>
+
 </manifest>

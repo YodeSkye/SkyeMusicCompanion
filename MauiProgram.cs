@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
+using SkyeMusicCompanion.Services;
 
 namespace SkyeMusicCompanion
 {
@@ -18,6 +19,10 @@ namespace SkyeMusicCompanion
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
+
+            // Register CompanionConnection as a Singleton so all pages and MainActivity share the same instance
+            builder.Services.AddSingleton<CompanionConnection>();
+
             builder.ConfigureLifecycleEvents(events =>
             {
 #if WINDOWS
