@@ -1,7 +1,7 @@
 [Setup]
 AppName=Skye Music Companion
-AppVersion=1.2
-AppVerName=Skye Music Companion v1.2
+AppVersion=1.3
+AppVerName=Skye Music Companion v1.3
 AppPublisher=Skye
 DefaultDirName={autopf}\Skye\Skye Music Companion
 ArchitecturesInstallIn64BitMode=x64compatible
