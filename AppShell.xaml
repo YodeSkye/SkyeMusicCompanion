@@ -61,4 +61,9 @@
         </ShellContent>
     </FlyoutItem>
 
+    <!-- Exit / Quit Flyout Option -->
+    <MenuItem Text="Exit Companion"
+              IconImageSource="exit.png"
+              Command="{Binding ExitAppCommand}" />
+
 </Shell>
