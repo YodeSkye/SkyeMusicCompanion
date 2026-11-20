@@ -345,7 +345,9 @@ namespace SkyeMusicCompanion
         }
         private void StartAudioStream()
         {
-            var (host, port) = ServerEndpointBuilder.Parse(Settings.StreamServerIp, 5051);
+            var profile = Settings.GetActiveProfile();
+            string host = profile.Host;
+            int port = profile.StreamPort;
 
             // Build the direct HTTP stream URL with the cache-buster
             string serverUrl = $"http://{host}:{port}/live?nocache={DateTime.Now.Ticks}";

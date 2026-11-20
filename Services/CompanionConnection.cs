@@ -26,13 +26,15 @@ namespace SkyeMusicCompanion.Services
         public event Action? PlaylistChanged;
         public event Action? PlaylistCleared;
 
-        public async Task ConnectAsync(string endpointInput)
+        public async Task ConnectAsync()
         {
             try
             {
                 _cts = new CancellationTokenSource();
 
-                var (host, port) = ServerEndpointBuilder.Parse(endpointInput, 5050);
+                var profile = Settings.GetActiveProfile();
+                string host = profile.Host;
+                int port = profile.HostPort;
 
                 _client = new TcpClient();
                 await _client.ConnectAsync(host, port);
@@ -66,7 +68,7 @@ namespace SkyeMusicCompanion.Services
             {
                 Disconnect();
                 // Pass the stored settings value into the updated ConnectAsync method
-                await ConnectAsync(Settings.HostServerIp);
+                await ConnectAsync();
             }
             catch (Exception ex)
             {

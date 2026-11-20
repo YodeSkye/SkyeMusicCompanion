@@ -3,70 +3,116 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://schemas.microsoft.com/dotnet/2021/maui/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:services="clr-namespace:SkyeMusicCompanion.Services"
              mc:Ignorable="d"
              x:Class="SkyeMusicCompanion.SettingsPage"
-             x:DataType="x:Object"
+             x:DataType="services:ServerProfile"
              Title="Settings">
 
-    <VerticalStackLayout Padding="20" Spacing="30">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="24">
 
-        <!-- Host IP Group -->
-        <VerticalStackLayout Spacing="0">
-            <Label Text="Host Server IP &amp; Port"
-                   FontAttributes="Bold" />
-            <Entry x:Name="HostEntry"
-                   Placeholder="e.g., 192.168.1.50 or 100.x.x.x:5050"
-                   PlaceholderColor="Gray"
-                   Keyboard="Url"
-                   ClearButtonVisibility="WhileEditing"
-                   Unfocused="OnHostChanged" />
+            <!-- Profile Selector & Add/Delete -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Connection Profile" FontAttributes="Bold" />
+
+                <Picker x:Name="ProfilePicker"
+                        ItemDisplayBinding="{Binding Name}"
+                        SelectedIndexChanged="OnProfileSelectionChanged" />
+
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                    <Button Grid.Column="1"
+                            Text="+ New"
+                            Clicked="OnNewProfileClicked" />
+                    <Button Grid.Column="2"
+                            Text="Delete"
+                            BackgroundColor="#8b1a10"
+                            TextColor="White"
+                            Clicked="OnDeleteProfileClicked" />
+                </Grid>
+            </VerticalStackLayout>
+
+            <!-- Active Profile Fields -->
+            <VerticalStackLayout Spacing="12">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Profile Name" FontAttributes="Bold" />
+                    <Entry x:Name="ProfileNameEntry"
+                           Placeholder="e.g., Home (LAN) or Tailscale"
+                           PlaceholderColor="Gray"
+                           ClearButtonVisibility="WhileEditing"
+                           Unfocused="OnProfileFieldChanged"
+                           Completed="OnProfileFieldChanged" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Server IP Address or Domain" FontAttributes="Bold" />
+                    <Entry x:Name="HostEntry"
+                           Placeholder="e.g., 192.168.1.50 or myserver.tailnet.ts.net"
+                           PlaceholderColor="Gray"
+                           Keyboard="Url"
+                           ClearButtonVisibility="WhileEditing"
+                           Unfocused="OnProfileFieldChanged"
+                           Completed="OnProfileFieldChanged" />
+                </VerticalStackLayout>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="Host Port" FontAttributes="Bold" />
+                        <Entry x:Name="HostPortEntry"
+                               Placeholder="5050"
+                               PlaceholderColor="Gray"
+                               Keyboard="Numeric"
+                               ClearButtonVisibility="WhileEditing"
+                               Unfocused="OnProfileFieldChanged"
+                               Completed="OnProfileFieldChanged" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                        <Label Text="Stream Port" FontAttributes="Bold" />
+                        <Entry x:Name="StreamPortEntry"
+                               Placeholder="5051"
+                               PlaceholderColor="Gray"
+                               Keyboard="Numeric"
+                               ClearButtonVisibility="WhileEditing"
+                               Unfocused="OnProfileFieldChanged"
+                               Completed="OnProfileFieldChanged" />
+                    </VerticalStackLayout>
+                </Grid>
+            </VerticalStackLayout>
+
+            <!-- Playlist Action Group (separated from connection profile fields) -->
+            <VerticalStackLayout Spacing="2" Margin="0,14,0,0">
+                <Label Text="Default Playlist Tap Action" FontAttributes="Bold" />
+                <Picker x:Name="TapActionPicker"
+                        SelectedIndexChanged="OnTapActionChanged">
+                    <Picker.Items>
+                        <x:String>Play Immediately</x:String>
+                        <x:String>Queue Item</x:String>
+                    </Picker.Items>
+                </Picker>
+            </VerticalStackLayout>
+
+            <!-- Keep Screen Awake Group (tightened spacing between toggle and help text) -->
+            <VerticalStackLayout Spacing="0">
+                <HorizontalStackLayout Padding="0,4,0,0" Spacing="12">
+                    <Label Text="Keep Screen Awake" VerticalOptions="Center" />
+                    <Switch x:Name="KeepAwakeSwitch"
+                            Toggled="OnKeepAwakeToggled"
+                            VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <Label Text="Keeps the screen from turning off while connected and playing. When plugged in: stays fully bright. When on battery: stays on but dims normally."
+                       FontSize="12"
+                       TextColor="Gray"
+                       Margin="0,-2,0,0" />
+            </VerticalStackLayout>
+
+            <Button Text="Delete Log File"
+                    Margin="0,12,0,0"
+                    BackgroundColor="#8b1a10"
+                    TextColor="White"
+                    Clicked="OnDeleteLogFileClicked" />
+
         </VerticalStackLayout>
-
-        <!-- Stream IP Group -->
-        <VerticalStackLayout Spacing="0">
-            <Label Text="Live Stream Server IP &amp; Port"
-                   FontAttributes="Bold" />
-            <Entry x:Name="StreamEntry"
-                   Placeholder="e.g., 192.168.1.50 or 100.x.x.x:5051"
-                   PlaceholderColor="Gray"
-                   Keyboard="Url"
-                   ClearButtonVisibility="WhileEditing"
-                   Unfocused="OnStreamChanged" />
-        </VerticalStackLayout>
-        
-        <!-- Playlist Action Group -->
-        <VerticalStackLayout Spacing="0">
-            <Label Text="Default Playlist Tap Action"
-           FontAttributes="Bold" />
-
-            <Picker x:Name="TapActionPicker"
-            SelectedIndexChanged="OnTapActionChanged">
-                <Picker.Items>
-                    <x:String>Play Immediately</x:String>
-                    <x:String>Queue Item</x:String>
-                </Picker.Items>
-            </Picker>
-        </VerticalStackLayout>
-
-        <!-- Keep Screen Awake Group -->
-        <HorizontalStackLayout Padding="0,10">
-            <Label Text="Keep Screen Awake"
-                VerticalOptions="Center" />
-            <Switch x:Name="KeepAwakeSwitch"
-                Toggled="OnKeepAwakeToggled"
-                HorizontalOptions="End" />
-        </HorizontalStackLayout>
-        <Label Text="Keeps the screen from turning off while connected and playing. 
-When plugged in: stays fully bright. 
-When on battery: stays on but dims normally."
-            FontSize="12"
-            TextColor="Gray"
-            Margin="0,-45,0,10" />
-        <Button Text="Delete Log File"
-            Margin="0,20,0,0"
-            BackgroundColor="#8b1a10"
-            TextColor="White"
-            Clicked="OnDeleteLogFileClicked" />
-    </VerticalStackLayout>
+    </ScrollView>
 
 </ContentPage>
