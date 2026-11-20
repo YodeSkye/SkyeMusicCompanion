@@ -17,7 +17,6 @@
                 <Label Text="Connection Profile" FontAttributes="Bold" />
 
                 <Picker x:Name="ProfilePicker"
-                        ItemDisplayBinding="{Binding Name}"
                         SelectedIndexChanged="OnProfileSelectionChanged" />
 
                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">

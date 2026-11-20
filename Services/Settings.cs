@@ -18,6 +18,8 @@ public class ServerProfile
         HostPort = HostPort,
         StreamPort = StreamPort
     };
+    
+    public override string ToString() => Name;
 }
 
 public static class Settings
